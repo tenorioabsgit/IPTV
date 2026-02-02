@@ -62,10 +62,51 @@ MJH_CHANNELS_URL = 'https://i.mjh.nz/SamsungTVPlus/.channels.json.gz'
 TARGET_REGIONS = ['BR', 'US', 'GB', 'CA', 'us', 'gb', 'ca']
 OUTPUT_FILE = 'playlist.m3u'
 
+# Mapeamento de região para nome do país
+REGION_TO_COUNTRY = {
+    'BR': 'Brasil',
+    'br': 'Brasil',
+    'US': 'USA',
+    'us': 'USA',
+    'GB': 'UK',
+    'gb': 'UK',
+    'CA': 'Canada',
+    'ca': 'Canada',
+}
+
 
 # ============================================================
 # FUNCOES
 # ============================================================
+
+def get_final_group(original_group, region):
+    """Determina o grupo final baseado no país ou se é música."""
+    original_lower = original_group.lower() if original_group else ''
+
+    # Se for música, coloca no grupo Music
+    if 'music' in original_lower:
+        return 'Music'
+
+    # Caso contrário, retorna o país
+    return REGION_TO_COUNTRY.get(region, 'Other')
+
+
+def extract_group_from_extinf(extinf_line):
+    """Extrai o group-title de uma linha EXTINF."""
+    import re
+    match = re.search(r'group-title="([^"]*)"', extinf_line)
+    return match.group(1) if match else ''
+
+
+def update_extinf_group(extinf_line, new_group):
+    """Atualiza o group-title em uma linha EXTINF."""
+    import re
+    if 'group-title="' in extinf_line:
+        return re.sub(r'group-title="[^"]*"', f'group-title="{new_group}"', extinf_line)
+    else:
+        # Adiciona group-title se não existir
+        return extinf_line.replace('#EXTINF:-1 ', f'#EXTINF:-1 group-title="{new_group}" ')
+
 
 def download_direct_m3u(url, name):
     """Baixa uma playlist M3U diretamente."""
@@ -101,7 +142,7 @@ def download_mjh_data():
         return None
 
 
-def parse_m3u_to_channels(content, source_name):
+def parse_m3u_to_channels(content, source_name, region):
     """Converte conteudo M3U em lista de canais."""
     lines = content.split('\n')
     channels = []
@@ -113,11 +154,14 @@ def parse_m3u_to_channels(content, source_name):
             current_extinf = line
         elif line.startswith('http') and current_extinf:
             name = current_extinf.split(',')[-1].strip() if ',' in current_extinf else 'Unknown'
+            original_group = extract_group_from_extinf(current_extinf)
             channels.append({
                 'name': name,
                 'url': line,
                 'extinf': current_extinf,
-                'source': source_name
+                'source': source_name,
+                'region': region,
+                'original_group': original_group
             })
             current_extinf = None
 
@@ -150,7 +194,9 @@ def generate_mjh_channels(data, region, source_name):
             'name': name,
             'url': stream_url,
             'extinf': extinf,
-            'source': source_name
+            'source': source_name,
+            'region': region,
+            'original_group': group
         })
 
     return channels
@@ -224,7 +270,7 @@ def collect_all_channels():
         if source_type == 'direct_m3u':
             content, count = download_direct_m3u(source['url'], source['name'])
             if content:
-                channels = parse_m3u_to_channels(content, source['name'])
+                channels = parse_m3u_to_channels(content, source['name'], region)
                 all_channels.extend(channels)
 
         elif source_type == 'mjh' and mjh_data:
@@ -245,7 +291,15 @@ def generate_m3u_content(channels):
     lines.append('')
 
     for ch in channels:
-        lines.append(ch['extinf'])
+        # Determina o grupo final (país ou Music)
+        original_group = ch.get('original_group', '')
+        region = ch.get('region', '')
+        final_group = get_final_group(original_group, region)
+
+        # Atualiza o extinf com o novo grupo
+        updated_extinf = update_extinf_group(ch['extinf'], final_group)
+
+        lines.append(updated_extinf)
         lines.append(ch['url'])
 
     return '\n'.join(lines)
