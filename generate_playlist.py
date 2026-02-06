@@ -120,20 +120,125 @@ REGION_TO_COUNTRY = {
     'ca': 'Canada',
 }
 
+# Classificação de canais brasileiros por categoria
+# Ordem importa: a primeira categoria que bater ganha
+BR_CATEGORIES = [
+    ('BR Legislativo', [
+        'tv câmara', 'tv camara', 'tv justiça', 'tv justica', 'alerj', 'almg', 'alesp',
+        'canal gov', 'tv senado', 'erga omnes', 'câmara lins', 'camara lins',
+    ]),
+    ('BR Anime', [
+        'naruto', 'death note', 'hunter x hunter', 'one piece', 'boruto', 'yu-gi-oh',
+        'pokémon', 'pokemon', 'beyblade', 'inuyasha', 'jojo', 'anime', 'tokusato',
+        'super onze', 'dragon ball', 'shippuden', 'otaku sign',
+    ]),
+    ('BR Kids', [
+        'nick jr', 'nickelodeon', 'turma da mônica', 'turma da monica', 'bob esponja',
+        'dpa', 'cocoricó', 'cocorico', 'teletubbies', 'smurfs', 'tartarugas ninja',
+        'reino infantil', 'padrinhos mágicos', 'padrinhos magicos', 'popeye',
+        'oggy', 'jetsons', 'inspetor bugiganga', 'icarly', 'kenan', 'babyfirst',
+        'moranguinho', 'pluto tv junior', 'pluto tv kids', 'kids club',
+        'gospel cartoon', 'ministério infantil', 'ministerio infantil', 'dm kids',
+        'f. kids', 'kids mais',
+    ]),
+    ('BR Notícias', [
+        'cnn brasil', 'jovem pan', 'record news', 'sbt news', 'bm&c news',
+        'bloomberg', 'euronews', 'news now', 'cbs news', 'usa today',
+        'newsmax', '011 news', 'canal uol', 'norte news',
+    ]),
+    ('BR Esportes', [
+        'fifa', 'dazn', 'pfl mma', 'fuel tv', 'racer', 'ge tv', 'sft combat',
+        'kickboxing', 'esporte', 'sport', 'baseball', 'billiard', 'poker',
+        'combat', 'horse', 'play tv horse', 'playtv horse', 'unique sports',
+        'rs sports', 'trace sport', 'people are awesome', 'speedvision',
+        'motorvision', 'pluto tv turbo', 'pluto tv esportes', 'auto tv',
+    ]),
+    ('BR Filmes', [
+        'pluto tv cine', 'pluto tv filmes', 'filmelier', 'darkflix', 'cinemonde',
+        'adrenalina pura', 'filmes suspense', 'cine sucessos', 'cine comédia',
+        'cine comedia', 'cine drama', 'cine terror', 'cine clássicos', 'cine classicos',
+        'cine romance', 'cine família', 'cine familia', 'ficção científica',
+        'ficcao cientifica', 'filmes nacionais', 'filmes aventura', 'filmes ação',
+        'filmes acão', 'filmes de luta', 'cine crime', 'cine inspiração',
+        'cine inspiracao', 'sony one cinema', 'movieark', 'clube do terror',
+        'terror trash', 'pluto tv bang bang', 'pluto tv policial', 'netmovies',
+        'runtime', 'tu cine', 'freetv acción', 'freetv accion', 'freetv drama',
+        'freetv terror', 'freetv familia', 'freetv sureño', 'freetv sureno',
+        'spark tv luz', 'gospel movie',
+    ]),
+    ('BR Séries', [
+        'walking dead', 'csi', 'ncis', 'charmed', 'macgyver', 'jornada nas estrelas',
+        'star trek', 'z nation', 'rookie blue', 'numbers', 'feiticeira',
+        'pluto tv séries', 'pluto tv series', 'séries classic', 'series classic',
+        'diff\'rent strokes', 'pluto tv novelas', 'séries novelescas',
+        'caçadora de relíquias', 'cacadora de reliquias', 'mistérios sem solução',
+        'misterios sem solucao', 'pluto tv retrô', 'pluto tv retro',
+        'pluto tv investigação', 'pluto tv investigacao', 'arquivos do fbi',
+        'estado paranormal', 'caçadores de óvnis', 'cacadores de ovnis',
+        'assombrações', 'assombracoes', 'pluto tv mistérios', 'pluto tv misterios',
+        'pluto tv aliens', 'detetives médicos', 'detetives medicos',
+        'pronto-socorro', 'acumuladores', 'pluto tv vida real', 'pluto tv curiosidade',
+        'obsessão favorita', 'obsessao favorita', 'negócio fechado', 'negocio fechado',
+        'homem que veio do céu', 'homem que veio do ceu',
+    ]),
+    ('BR Entretenimento', [
+        'mtv', 'comedy central', 'failarmy', 'masterchef', 'south park',
+        'pegadinhas', 'just for laughs', 'shark tank', 'encantador de cães',
+        'encantador de caes', 'pluto tv animais', 'pet collective', 'fashiontv',
+        'caras tv', 'pluto tv história', 'pluto tv historia', 'smithsonian',
+        'pluto tv natureza', 'nature time', 'weatherspy', 'pluto tv cozinha',
+        'kfood', 'gusto tv', 'receitas fast', 'tastemade', 'pluto tv viagens',
+        'gousa', 'arirang', 'bet pluto', 'pluto tv gaming', 'realmadrid tv',
+        'geekdot', 'salon line', 'sony one emoções', 'sony one emocoes',
+        'malhacao', 'malhação', 'novela',
+    ]),
+    ('BR Religiosas', [
+        'aparecida', 'canção nova', 'cancao nova', 'rit tv', 'rittv', 'evangelizar',
+        'novo tempo', 'gospel', 'igreja', 'católica', 'catolica', 'cristão', 'cristao',
+        'promessas', 'pai eterno', 'terceiro anjo', 'avivando', 'apóstolos', 'apostolos',
+        'imjc', 'kuriakos', 'adorador', 'adorar', 'katholika', 'família de jesus',
+        'familia de jesus', 'maanaim', 'manancial', 'tv sbn', 'angel tv',
+        'caminho antigo', 'tv alpha', 'web tv catolica', 'unifé', 'unife',
+        'tv feliz', 'tenda tv',
+    ]),
+    ('BR Música', [
+        'stingray', 'karaokê', 'karaoke', 'forró', 'forro', 'sertanejo',
+        'pop retrô', 'pop retro', 'rock show', 'qwest tv', 'hits', 'kpop',
+        'classique tv', 'rede blitz', 'mtv biggest pop', 'mtv rocks', 'mtv classic',
+        'rádio forró', 'radio forro', 'hip-hop', 'hip hop', 'caipira',
+        'pluto tv shows por stingray', 'pluto tv paisagens', 'pluto tv karaokê',
+        'tikitok radio', 'tiktok radio',
+    ]),
+]
+
 
 # ============================================================
 # FUNCOES
 # ============================================================
 
-def get_final_group(original_group, region):
-    """Determina o grupo final baseado no país ou se é música."""
+def classify_br_channel(channel_name):
+    """Classifica um canal brasileiro em subcategoria."""
+    name_lower = channel_name.lower()
+    for category, keywords in BR_CATEGORIES:
+        for kw in keywords:
+            if kw in name_lower:
+                return category
+    return 'BR Variedades'
+
+
+def get_final_group(original_group, region, channel_name=''):
+    """Determina o grupo final baseado no país, categoria ou música."""
     original_lower = original_group.lower() if original_group else ''
 
-    # Se for música, coloca no grupo Music
+    # Se for música (qualquer região), coloca no grupo Music
     if 'music' in original_lower:
         return 'Music'
 
-    # Caso contrário, retorna o país
+    # Se for Brasil, classifica em subcategoria
+    if region.upper() == 'BR':
+        return classify_br_channel(channel_name)
+
+    # Demais regiões: retorna o país
     return REGION_TO_COUNTRY.get(region, 'Other')
 
 
@@ -354,10 +459,11 @@ def generate_m3u_content(channels):
     lines.append('')
 
     for ch in channels:
-        # Determina o grupo final (país ou Music)
+        # Determina o grupo final (subcategoria BR, país ou Music)
         original_group = ch.get('original_group', '')
         region = ch.get('region', '')
-        final_group = get_final_group(original_group, region)
+        channel_name = ch.get('name', '')
+        final_group = get_final_group(original_group, region, channel_name)
 
         # Atualiza o extinf com o novo grupo
         updated_extinf = update_extinf_group(ch['extinf'], final_group)
