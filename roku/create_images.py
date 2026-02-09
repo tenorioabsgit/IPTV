@@ -60,14 +60,14 @@ def create_poster(width, height, filename):
         font_big = ImageFont.load_default()
         font_small = ImageFont.load_default()
 
-    # "IPTV" text
-    text = "IPTV"
+    # "Pira" text
+    text = "Pira"
     bbox = draw.textbbox((0, 0), text, font=font_big)
     tw = bbox[2] - bbox[0]
     draw.text((width // 2 - tw // 2, height - 52), text, fill=ACCENT_COLOR, font=font_big)
 
-    # "Player" text
-    text2 = "Player"
+    # "IPTV" text
+    text2 = "IPTV"
     bbox2 = draw.textbbox((0, 0), text2, font=font_small)
     tw2 = bbox2[2] - bbox2[0]
     draw.text((width // 2 - tw2 // 2, height - 28), text2, fill=TEXT_DIM, font=font_small)
@@ -101,8 +101,8 @@ def create_splash(width, height, filename):
         font_title = ImageFont.load_default()
         font_sub = ImageFont.load_default()
 
-    # "IPTV Player"
-    title = "IPTV Player"
+    # "Pira IPTV"
+    title = "Pira IPTV"
     bbox = draw.textbbox((0, 0), title, font=font_title)
     tw = bbox[2] - bbox[0]
     draw.text((width // 2 - tw // 2, height // 2 + 30), title, fill=ACCENT_COLOR, font=font_title)

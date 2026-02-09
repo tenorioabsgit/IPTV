@@ -9,8 +9,13 @@ sub init()
     m.errorMessage = m.top.findNode("errorMessage")
 
     m.currentContent = invalid
-    m.osdTimer = invalid
     m.hasError = false
+
+    ' Create reusable OSD timer (avoid creating new Timer nodes each time)
+    m.osdTimer = createObject("roSGNode", "Timer")
+    m.osdTimer.duration = 3
+    m.osdTimer.repeat = false
+    m.osdTimer.observeField("fire", "hideOsd")
 
     ' Observe video state
     m.video.observeField("state", "onVideoStateChange")
@@ -48,7 +53,11 @@ sub playVideo(channelNode as object)
 
     m.video.content = videoContent
     m.video.control = "play"
-    m.video.setFocus(true)
+
+    ' NOTE: Do NOT set focus on the Video node (m.video.setFocus).
+    ' The Video node intercepts key events (channelUp/channelDown, arrows)
+    ' before they reach onKeyEvent. Focus stays on the VideoPlayer component
+    ' itself, set by MainScene via m.videoPlayer.setFocus(true).
 
     ' Show OSD and start timer to hide it
     showOsd()
@@ -92,16 +101,8 @@ sub showOsd()
     m.osdGroup.visible = true
     m.osdHints.visible = true
 
-    ' Cancel existing timer
-    if m.osdTimer <> invalid
-        m.osdTimer.control = "stop"
-    end if
-
-    ' Create timer to hide OSD after 3 seconds
-    m.osdTimer = createObject("roSGNode", "Timer")
-    m.osdTimer.duration = 3
-    m.osdTimer.repeat = false
-    m.osdTimer.observeField("fire", "hideOsd")
+    ' Restart the reusable timer to hide OSD after 3 seconds
+    m.osdTimer.control = "stop"
     m.osdTimer.control = "start"
 end sub
 
@@ -155,16 +156,13 @@ function onKeyEvent(key as string, press as boolean) as boolean
         return true
     end if
 
-    ' Any key shows OSD
-    if key = "up" or key = "down" or key = "left" or key = "right"
-        showOsd()
-        return true
-    end if
-
     ' CH+/CH- handled by parent (MainScene)
     if key = "channelUp" or key = "channelDown"
+        showOsd()
         return false ' Let parent handle
     end if
 
+    ' Any other key shows OSD briefly
+    showOsd()
     return false
 end function

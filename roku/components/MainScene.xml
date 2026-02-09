@@ -16,12 +16,12 @@
         <Group id="headerGroup" translation="[90, 22]">
             <Label
                 id="appTitle"
-                text="IPTV"
+                text="Pira"
                 font="font:LargeBoldSystemFont"
                 color="0x00D4FFFF" />
             <Label
                 id="appSubtitle"
-                text="Player"
+                text="IPTV"
                 translation="[95, 6]"
                 font="font:MediumSystemFont"
                 color="0x555555FF" />
@@ -139,7 +139,7 @@
                 translation="[40, 0]" />
             <Label
                 id="loadingLabel"
-                text="Carregando canais..."
+                text="Carregando..."
                 font="font:MediumSystemFont"
                 color="0x555555FF" />
         </LayoutGroup>
@@ -150,9 +150,10 @@
             translation="[90, 380]"
             itemComponentName="ChannelCard"
             numRows="2"
+            itemSize="[1740, 260]"
             rowItemSize="[[260, 170]]"
-            itemSpacing="[[20, 0]]"
-            rowSpacing="[0, 50]"
+            rowItemSpacing="[[20, 0]]"
+            itemSpacing="[0, 30]"
             showRowLabel="[true]"
             rowLabelOffset="[[0, 12]]"
             rowLabelColor="0xAAAAAAFF"

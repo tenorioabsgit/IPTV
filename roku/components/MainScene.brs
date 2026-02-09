@@ -178,24 +178,18 @@ function onKeyEvent(key as string, press as boolean) as boolean
     if not press then return false
 
     if m.isPlayerVisible
-        ' Player visible - handle CH+/CH-
-        if key = "channelUp" or key = "fastforward"
+        ' Player visible - handle channel switching
+        ' Support multiple keys: up/channelUp/fastforward for next,
+        ' down/channelDown/rewind for previous (CH+/CH- may not exist
+        ' on all remotes or may be intercepted by Roku TV system)
+        if key = "up" or key = "channelUp" or key = "fastforward"
             playNextChannel()
             return true
-        else if key = "channelDown" or key = "rewind"
+        else if key = "down" or key = "channelDown" or key = "rewind"
             playPreviousChannel()
             return true
         end if
         return false
-    end if
-
-    ' CH+/CH- while browsing
-    if key = "channelUp"
-        playNextChannel()
-        return true
-    else if key = "channelDown"
-        playPreviousChannel()
-        return true
     end if
 
     return false

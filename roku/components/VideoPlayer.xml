@@ -95,7 +95,7 @@
                     color="0x00D4FF40" />
 
                 <Label
-                    text="&lt;&lt; CH-          OK Pausar          CH+ &gt;&gt;          Voltar"
+                    text="&#9650; Canal+          OK Pausar          &#9660; Canal-          Voltar"
                     translation="[20, 11]"
                     font="font:SmallSystemFont"
                     color="0x555555FF"
