@@ -10,7 +10,7 @@ class ChannelLogo extends StatelessWidget {
     super.key,
     this.logoUrl,
     this.size = 48,
-    this.borderRadius = 8,
+    this.borderRadius = 6,
   });
 
   @override
@@ -37,13 +37,14 @@ class ChannelLogo extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        color: const Color(0xFF1A1A1A),
         borderRadius: BorderRadius.circular(borderRadius),
+        border: Border.all(color: const Color(0xFF2A2A2A), width: 1),
       ),
       child: Icon(
         Icons.tv,
-        size: size * 0.5,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        size: size * 0.45,
+        color: const Color(0xFF444444),
       ),
     );
   }

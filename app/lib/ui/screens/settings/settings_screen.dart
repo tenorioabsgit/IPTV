@@ -32,7 +32,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = ref.watch(darkModeProvider);
-    final colorScheme = Theme.of(context).colorScheme;
+    final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Configurações')),
@@ -40,19 +40,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           // Appearance
-          Text(
-            'Aparência',
-            style: TextStyle(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          _SectionTitle(text: 'Aparência', color: colors.primary),
           const SizedBox(height: 8),
           Card(
             child: SwitchListTile(
               title: const Text('Modo escuro'),
-              subtitle: const Text('Tema escuro para melhor visualização'),
-              secondary: Icon(isDark ? Icons.dark_mode : Icons.light_mode),
+              subtitle: const Text(
+                'Tema escuro para melhor visualização',
+                style: TextStyle(fontSize: 12, color: Color(0xFF808080)),
+              ),
+              secondary: Icon(
+                isDark ? Icons.dark_mode : Icons.light_mode,
+                color: colors.primary,
+              ),
               value: isDark,
               onChanged: (value) {
                 ref.read(darkModeProvider.notifier).state = value;
@@ -64,13 +64,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 24),
 
           // Playlist
-          Text(
-            'Playlist',
-            style: TextStyle(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          _SectionTitle(text: 'Playlist', color: colors.primary),
           const SizedBox(height: 8),
           Card(
             child: Padding(
@@ -83,7 +77,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     decoration: const InputDecoration(
                       labelText: 'URL da Playlist M3U',
                       hintText: 'https://...',
-                      border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.link),
                     ),
                     maxLines: 2,
@@ -112,35 +105,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 24),
 
           // Data
-          Text(
-            'Dados',
-            style: TextStyle(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          _SectionTitle(text: 'Dados', color: colors.primary),
           const SizedBox(height: 8),
           Card(
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.refresh),
+                  leading: Icon(Icons.refresh, color: colors.onSurfaceVariant),
                   title: const Text('Atualizar playlist'),
-                  subtitle: const Text('Baixar novamente a lista de canais'),
+                  subtitle: const Text(
+                    'Baixar novamente a lista de canais',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF808080)),
+                  ),
                   onTap: () {
                     ref.read(playlistProvider.notifier).refresh();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Atualizando playlist...')),
+                      const SnackBar(
+                          content: Text('Atualizando playlist...')),
                     );
                   },
                 ),
-                const Divider(height: 1),
+                const Divider(height: 1, indent: 16, endIndent: 16),
                 ListTile(
-                  leading: const Icon(Icons.delete_outline),
+                  leading: Icon(Icons.delete_outline,
+                      color: colors.onSurfaceVariant),
                   title: const Text('Limpar histórico'),
-                  subtitle: const Text('Remover canais assistidos recentemente'),
+                  subtitle: const Text(
+                    'Remover canais assistidos recentemente',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF808080)),
+                  ),
                   onTap: () async {
-                    await ref.read(historyRepositoryProvider).clearHistory();
+                    await ref
+                        .read(historyRepositoryProvider)
+                        .clearHistory();
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Histórico limpo')),
@@ -154,20 +151,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 24),
 
           // About
-          Text(
-            'Sobre',
-            style: TextStyle(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          _SectionTitle(text: 'Sobre', color: colors.primary),
           const SizedBox(height: 8),
           Card(
             child: ListTile(
-              leading: const Icon(Icons.info_outline),
+              leading: Icon(Icons.info_outline, color: colors.primary),
               title: const Text('IPTV Player v1.0.0'),
               subtitle: const Text(
                 'Player IPTV gratuito e open-source',
+                style: TextStyle(fontSize: 12, color: Color(0xFF808080)),
               ),
             ),
           ),
@@ -183,7 +175,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ref.read(settingsRepositoryProvider).setPlaylistUrl(url);
       ref.read(playlistProvider.notifier).refresh();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('URL salva. Atualizando playlist...')),
+        const SnackBar(
+            content: Text('URL salva. Atualizando playlist...')),
       );
     }
   }
@@ -191,5 +184,25 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _resetUrl() {
     _urlController.text = AppConstants.defaultPlaylistUrl;
     _saveUrl();
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String text;
+  final Color color;
+
+  const _SectionTitle({required this.text, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: TextStyle(
+        color: color,
+        fontWeight: FontWeight.w700,
+        fontSize: 13,
+        letterSpacing: 0.5,
+      ),
+    );
   }
 }

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="ChannelCard" extends="Group">
+    <interface>
+        <field id="itemContent" type="node" onChange="onContentChange" />
+        <field id="focusPercent" type="float" onChange="onFocusChange" />
+        <field id="width" type="float" />
+        <field id="height" type="float" />
+    </interface>
+    <script type="text/brightscript" uri="pkg:/components/ChannelCard.brs" />
+
+    <children>
+        <!-- Focus glow border (slightly larger than card, behind it) -->
+        <Rectangle
+            id="focusBorder"
+            translation="[-3, -3]"
+            width="266"
+            height="176"
+            color="0x00D4FFFF"
+            opacity="0.0" />
+
+        <!-- Card background -->
+        <Rectangle
+            id="cardBg"
+            width="260"
+            height="170"
+            color="0x1A1A1AFF">
+
+            <!-- Channel poster/logo -->
+            <Poster
+                id="poster"
+                width="260"
+                height="170"
+                loadDisplayMode="scaleToZoom"
+                loadingBitmapOpacity="0.0"
+                failedBitmapOpacity="0.0" />
+
+            <!-- No-poster fallback: dark card with initial letter -->
+            <Rectangle
+                id="noPosterBg"
+                width="260"
+                height="170"
+                color="0x141414FF"
+                visible="false">
+                <Label
+                    id="noPosterLetter"
+                    translation="[0, 30]"
+                    width="260"
+                    height="100"
+                    font="font:LargeBoldSystemFont"
+                    color="0x333333FF"
+                    horizAlign="center"
+                    vertAlign="center" />
+            </Rectangle>
+
+            <!-- Bottom gradient overlay for text readability -->
+            <Poster
+                id="gradientOverlay"
+                translation="[0, 85]"
+                width="260"
+                height="85"
+                uri="pkg:/images/card-overlay.png"
+                loadDisplayMode="scaleToFill" />
+
+            <!-- Channel name at bottom -->
+            <Label
+                id="channelName"
+                translation="[12, 140]"
+                font="font:SmallBoldSystemFont"
+                color="0xE5E5E5FF"
+                width="236"
+                height="24"
+                maxLines="1" />
+        </Rectangle>
+    </children>
+</component>

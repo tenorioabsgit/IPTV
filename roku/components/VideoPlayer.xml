@@ -22,67 +22,89 @@
             translation="[0, 0]"
             enableUI="false" />
 
-        <!-- OSD overlay - channel name -->
+        <!-- ===== OSD OVERLAY - Top info card ===== -->
         <Group id="osdGroup" visible="true">
+            <!-- Dark frosted panel -->
             <Rectangle
-                id="osdBg"
-                translation="[30, 30]"
-                width="600"
-                height="60"
-                color="0x00000099"
-                opacity="0.85">
+                translation="[50, 35]"
+                width="740"
+                height="115"
+                color="0x0D0D0DE6">
+
+                <!-- Accent left edge -->
+                <Rectangle
+                    width="3"
+                    height="115"
+                    color="0x00D4FFFF" />
+
+                <!-- Play icon -->
                 <Label
                     id="osdIcon"
                     text=">"
-                    translation="[15, 12]"
-                    font="font:MediumSystemFont"
+                    translation="[24, 22]"
+                    font="font:LargeBoldSystemFont"
                     color="0x00D4FFFF" />
+
+                <!-- Channel name -->
                 <Label
                     id="osdChannelName"
                     text=""
-                    translation="[45, 12]"
-                    font="font:MediumBoldSystemFont"
-                    color="0xFFFFFFFF"
+                    translation="[68, 18]"
+                    font="font:LargeBoldSystemFont"
+                    color="0xEEEEEEFF"
                     maxLines="1"
-                    width="530" />
-            </Rectangle>
-            <Rectangle
-                id="osdCategoryBg"
-                translation="[30, 95]"
-                width="400"
-                height="35"
-                color="0x00000077"
-                opacity="0.7">
+                    width="650" />
+
+                <!-- Category + Live tag -->
                 <Label
                     id="osdCategory"
                     text=""
-                    translation="[15, 5]"
+                    translation="[68, 68]"
                     font="font:SmallSystemFont"
-                    color="0xAAAAAAFF"
+                    color="0x666666FF"
                     maxLines="1"
-                    width="370" />
+                    width="500" />
+
+                <!-- Live dot -->
+                <Rectangle
+                    id="osdLiveDot"
+                    translation="[680, 76]"
+                    width="8"
+                    height="8"
+                    color="0xFF3333FF" />
+                <Label
+                    translation="[694, 68]"
+                    text="LIVE"
+                    font="font:SmallBoldSystemFont"
+                    color="0xFF3333FF" />
             </Rectangle>
         </Group>
 
-        <!-- OSD hints at bottom -->
+        <!-- ===== OSD HINTS - Bottom bar ===== -->
         <Group id="osdHints" visible="true">
             <Rectangle
-                translation="[560, 1010]"
-                width="800"
-                height="40"
-                color="0x00000088"
-                opacity="0.7">
+                translation="[460, 1005]"
+                width="1000"
+                height="44"
+                color="0x0D0D0DCC">
+
+                <!-- Accent top edge -->
+                <Rectangle
+                    width="1000"
+                    height="1"
+                    color="0x00D4FF40" />
+
                 <Label
-                    text="&lt; CH-     OK Pause     CH+ &gt;     Voltar"
-                    translation="[20, 8]"
+                    text="&lt;&lt; CH-          OK Pausar          CH+ &gt;&gt;          Voltar"
+                    translation="[20, 11]"
                     font="font:SmallSystemFont"
-                    color="0xCCCCCCFF"
-                    width="760"
+                    color="0x555555FF"
+                    width="960"
                     horizAlign="center" />
             </Rectangle>
         </Group>
 
-        <!-- Buffering indicator -->
+        <!-- ===== BUFFERING INDICATOR ===== -->
         <LayoutGroup
             id="bufferingGroup"
             translation="[860, 490]"
@@ -95,46 +117,73 @@
                 id="bufferLabel"
                 text="Carregando..."
                 font="font:SmallSystemFont"
-                color="0xFFFFFFFF" />
+                color="0x888888FF" />
         </LayoutGroup>
 
-        <!-- Error overlay -->
+        <!-- ===== ERROR OVERLAY ===== -->
         <Group id="errorGroup" visible="false">
+            <!-- Semi-transparent backdrop -->
             <Rectangle
-                translation="[610, 390]"
-                width="700"
-                height="300"
-                color="0x000000DD"
-                opacity="0.9">
+                width="1920"
+                height="1080"
+                color="0x0D0D0DDD" />
+
+            <!-- Error card -->
+            <Rectangle
+                translation="[560, 340]"
+                width="800"
+                height="400"
+                color="0x161616FF">
+
+                <!-- Top accent line -->
+                <Rectangle
+                    width="800"
+                    height="3"
+                    color="0xFF3333FF" />
+
+                <!-- Error icon -->
                 <Label
                     id="errorIcon"
                     text="!"
-                    translation="[310, 30]"
+                    translation="[365, 45]"
                     font="font:LargeBoldSystemFont"
-                    color="0xFF4444FF" />
+                    color="0xFF3333FF" />
+
+                <!-- Error title -->
                 <Label
                     id="errorTitle"
                     text="Erro ao reproduzir"
-                    translation="[180, 100]"
-                    font="font:MediumBoldSystemFont"
-                    color="0xFFFFFFFF"
-                    width="340"
+                    translation="[100, 120]"
+                    font="font:LargeBoldSystemFont"
+                    color="0xEEEEEEFF"
+                    width="600"
                     horizAlign="center" />
+
+                <!-- Error message -->
                 <Label
                     id="errorMessage"
                     text=""
-                    translation="[50, 150]"
+                    translation="[100, 185]"
                     font="font:SmallSystemFont"
-                    color="0xAAAAAAFF"
+                    color="0x666666FF"
                     width="600"
                     horizAlign="center"
                     maxLines="3" />
+
+                <!-- Separator -->
+                <Rectangle
+                    translation="[100, 280]"
+                    width="600"
+                    height="1"
+                    color="0x2A2A2AFF" />
+
+                <!-- Retry hint -->
                 <Label
                     text="Pressione OK para tentar novamente"
-                    translation="[120, 230]"
-                    font="font:SmallSystemFont"
+                    translation="[100, 310]"
+                    font="font:MediumBoldSystemFont"
                     color="0x00D4FFFF"
-                    width="460"
+                    width="600"
                     horizAlign="center" />
             </Rectangle>
         </Group>

@@ -1,17 +1,15 @@
 sub init()
-    m.categoryList = m.top.findNode("categoryList")
-    m.channelGrid = m.top.findNode("channelGrid")
+    m.rowList = m.top.findNode("rowList")
     m.videoPlayer = m.top.findNode("videoPlayer")
     m.loadingGroup = m.top.findNode("loadingGroup")
-    m.categoryPanel = m.top.findNode("categoryPanel")
-    m.gridPanel = m.top.findNode("gridPanel")
-    m.gridTitle = m.top.findNode("gridTitle")
+    m.heroGroup = m.top.findNode("heroGroup")
+    m.heroPoster = m.top.findNode("heroPoster")
+    m.heroChannelName = m.top.findNode("heroChannelName")
+    m.heroCategory = m.top.findNode("heroCategory")
     m.channelCount = m.top.findNode("channelCount")
 
-    ' Store all content and current state
+    ' State
     m.allContent = invalid
-    m.currentCategoryIndex = 0
-    m.focusOnGrid = false
     m.isPlayerVisible = false
 
     ' All channels list for CH+/CH- navigation
@@ -23,16 +21,12 @@ sub init()
     m.playlistTask.observeField("output", "onPlaylistLoaded")
     m.playlistTask.control = "run"
 
-    ' Observe category selection
-    m.categoryList.observeField("itemFocused", "onCategoryFocused")
+    ' Observe RowList events
+    m.rowList.observeField("rowItemFocused", "onRowItemFocused")
+    m.rowList.observeField("rowItemSelected", "onRowItemSelected")
 
-    ' Observe grid selection
-    m.channelGrid.observeField("itemSelected", "onChannelSelected")
-
-    ' Observe video player events
+    ' Observe video player close
     m.videoPlayer.observeField("playerClosed", "onPlayerClosed")
-
-    m.categoryList.setFocus(true)
 end sub
 
 sub onPlaylistLoaded()
@@ -41,88 +35,98 @@ sub onPlaylistLoaded()
 
     m.allContent = content
     m.loadingGroup.visible = false
-    m.categoryPanel.visible = true
-    m.gridPanel.visible = true
+    m.heroGroup.visible = true
+    m.rowList.visible = true
 
-    ' Build flat channel list for CH+/CH- navigation
+    ' Build flat channel list for CH+/CH-
     m.allChannels = createObject("roArray", 0, true)
     if content.getChildCount() > 0
-        ' First category is "Todos" - use it for all channels
         allCat = content.getChild(0)
         for i = 0 to allCat.getChildCount() - 1
             m.allChannels.push(allCat.getChild(i))
         end for
     end if
 
-    ' Build category list content
-    catContent = createObject("roSGNode", "ContentNode")
-    for i = 0 to content.getChildCount() - 1
-        catItem = catContent.createChild("ContentNode")
-        catItem.title = content.getChild(i).title
-    end for
-    m.categoryList.content = catContent
-
-    totalChannels = 0
-    if m.allChannels.count() > 0
-        totalChannels = m.allChannels.count()
-    end if
+    ' Set channel count
+    totalChannels = m.allChannels.count()
     countStr = str(totalChannels)
-    if left(countStr, 1) = " "
-        countStr = mid(countStr, 2)
+    if left(countStr, 1) = " " then countStr = mid(countStr, 2)
+    m.channelCount.text = countStr
+
+    ' Set content directly to RowList
+    m.rowList.content = content
+
+    ' Update hero with first channel
+    if content.getChildCount() > 0 and content.getChild(0).getChildCount() > 0
+        updateHero(content.getChild(0).getChild(0), content.getChild(0).title)
     end if
-    m.channelCount.text = countStr + " canais"
 
-    ' Show first category channels
-    showCategoryChannels(0)
-
-    m.categoryList.setFocus(true)
+    m.rowList.setFocus(true)
 end sub
 
-sub onCategoryFocused()
-    index = m.categoryList.itemFocused
-    if index >= 0
-        showCategoryChannels(index)
-    end if
-end sub
+sub onRowItemFocused()
+    focused = m.rowList.rowItemFocused
+    if focused = invalid then return
 
-sub showCategoryChannels(catIndex as integer)
+    rowIndex = focused[0]
+    itemIndex = focused[1]
+
     if m.allContent = invalid then return
-    if catIndex < 0 or catIndex >= m.allContent.getChildCount() then return
+    if rowIndex < 0 or rowIndex >= m.allContent.getChildCount() then return
 
-    m.currentCategoryIndex = catIndex
-    catNode = m.allContent.getChild(catIndex)
+    row = m.allContent.getChild(rowIndex)
+    if itemIndex < 0 or itemIndex >= row.getChildCount() then return
 
-    ' Update title
-    m.gridTitle.text = catNode.title
-
-    ' Build grid content
-    gridContent = createObject("roSGNode", "ContentNode")
-    for i = 0 to catNode.getChildCount() - 1
-        ch = catNode.getChild(i)
-        item = gridContent.createChild("ContentNode")
-        item.title = ch.title
-        item.hdPosterUrl = ch.hdPosterUrl
-        item.sdPosterUrl = ch.sdPosterUrl
-        item.url = ch.url
-        item.description = ch.description
-        item.shortDescriptionLine1 = ch.title
-        item.streamFormat = ch.streamFormat
-    end for
-
-    m.channelGrid.content = gridContent
+    updateHero(row.getChild(itemIndex), row.title)
 end sub
 
-sub onChannelSelected()
-    index = m.channelGrid.itemSelected
-    if index < 0 then return
+sub updateHero(channelNode as object, categoryTitle as string)
+    m.heroChannelName.text = channelNode.title
 
-    catNode = m.allContent.getChild(m.currentCategoryIndex)
-    if catNode = invalid then return
+    ' Show category (strip the count suffix for cleaner display)
+    if categoryTitle <> invalid and categoryTitle <> ""
+        ' Remove " (N)" suffix from category name
+        parenPos = 0
+        for c = 1 to len(categoryTitle)
+            if mid(categoryTitle, c, 1) = "("
+                parenPos = c
+                exit for
+            end if
+        end for
+        if parenPos > 1
+            cleanTitle = left(categoryTitle, parenPos - 2)
+        else
+            cleanTitle = categoryTitle
+        end if
+        m.heroCategory.text = cleanTitle
+    else
+        m.heroCategory.text = ""
+    end if
 
-    channelNode = catNode.getChild(index)
-    if channelNode = invalid then return
+    ' Update hero poster
+    if channelNode.hdPosterUrl <> invalid and channelNode.hdPosterUrl <> ""
+        m.heroPoster.uri = channelNode.hdPosterUrl
+    else
+        m.heroPoster.uri = ""
+    end if
+end sub
 
-    ' Find index in all channels list
+sub onRowItemSelected()
+    selected = m.rowList.rowItemSelected
+    if selected = invalid then return
+
+    rowIndex = selected[0]
+    itemIndex = selected[1]
+
+    if m.allContent = invalid then return
+    if rowIndex < 0 or rowIndex >= m.allContent.getChildCount() then return
+
+    row = m.allContent.getChild(rowIndex)
+    if itemIndex < 0 or itemIndex >= row.getChildCount() then return
+
+    channelNode = row.getChild(itemIndex)
+
+    ' Find index in all channels list for CH+/CH-
     for i = 0 to m.allChannels.count() - 1
         if m.allChannels[i].url = channelNode.url
             m.currentChannelIndex = i
@@ -136,8 +140,8 @@ end sub
 sub playChannel(channelNode as object)
     m.isPlayerVisible = true
     m.videoPlayer.visible = true
-    m.categoryPanel.visible = false
-    m.gridPanel.visible = false
+    m.heroGroup.visible = false
+    m.rowList.visible = false
 
     m.videoPlayer.callFunc("playVideo", channelNode)
     m.videoPlayer.setFocus(true)
@@ -146,14 +150,10 @@ end sub
 sub onPlayerClosed()
     m.isPlayerVisible = false
     m.videoPlayer.visible = false
-    m.categoryPanel.visible = true
-    m.gridPanel.visible = true
+    m.heroGroup.visible = true
+    m.rowList.visible = true
 
-    if m.focusOnGrid
-        m.channelGrid.setFocus(true)
-    else
-        m.categoryList.setFocus(true)
-    end if
+    m.rowList.setFocus(true)
 end sub
 
 sub playNextChannel()
@@ -178,7 +178,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
     if not press then return false
 
     if m.isPlayerVisible
-        ' Player is visible - handle CH+/CH-
+        ' Player visible - handle CH+/CH-
         if key = "channelUp" or key = "fastforward"
             playNextChannel()
             return true
@@ -189,18 +189,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
         return false
     end if
 
-    ' Navigate between category list and grid
-    if key = "right" and not m.focusOnGrid
-        m.focusOnGrid = true
-        m.channelGrid.setFocus(true)
-        return true
-    else if key = "left" and m.focusOnGrid
-        m.focusOnGrid = false
-        m.categoryList.setFocus(true)
-        return true
-    end if
-
-    ' CH+/CH- while browsing (if channel is playing)
+    ' CH+/CH- while browsing
     if key = "channelUp"
         playNextChannel()
         return true

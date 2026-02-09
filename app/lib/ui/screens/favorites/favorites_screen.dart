@@ -34,13 +34,23 @@ class FavoritesScreen extends ConsumerWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.favorite_border, size: 48),
+                        Icon(Icons.favorite_border,
+                            size: 48, color: Color(0xFF444444)),
                         SizedBox(height: 16),
-                        Text('Nenhum favorito ainda'),
+                        Text(
+                          'Nenhum favorito ainda',
+                          style: TextStyle(
+                            color: Color(0xFFE5E5E5),
+                            fontSize: 16,
+                          ),
+                        ),
                         SizedBox(height: 8),
                         Text(
                           'Toque no coração de um canal para salvar',
-                          style: TextStyle(fontSize: 12),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF808080),
+                          ),
                         ),
                       ],
                     ),
@@ -49,13 +59,13 @@ class FavoritesScreen extends ConsumerWidget {
 
                 if (isGrid) {
                   return GridView.builder(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(12),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
-                      childAspectRatio: 0.85,
-                      crossAxisSpacing: 4,
-                      mainAxisSpacing: 4,
+                      childAspectRatio: 1.35,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
                     ),
                     itemCount: channels.length,
                     itemBuilder: (_, i) =>
@@ -64,14 +74,22 @@ class FavoritesScreen extends ConsumerWidget {
                 }
 
                 return ListView.builder(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   itemCount: channels.length,
                   itemBuilder: (_, i) =>
                       ChannelListTile(channel: channels[i]),
                 );
               },
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Erro: $e')),
+              loading: () => const Center(
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              error: (e, _) => Center(
+                child: Text(
+                  'Erro: $e',
+                  style: const TextStyle(color: Color(0xFF808080)),
+                ),
+              ),
             ),
           ),
           if (hasActiveChannel)

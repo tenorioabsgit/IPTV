@@ -11,12 +11,16 @@ class CategorySidebar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final playlistState = ref.watch(playlistProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
-    final colorScheme = Theme.of(context).colorScheme;
 
     return playlistState.when(
-      data: (data) => _buildList(context, ref, data.groups, selectedCategory, colorScheme),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Erro: $e')),
+      data: (data) =>
+          _buildList(context, ref, data.groups, selectedCategory),
+      loading: () => const Center(
+        child: CircularProgressIndicator(strokeWidth: 2),
+      ),
+      error: (e, _) => Center(
+        child: Text('Erro: $e', style: const TextStyle(fontSize: 12)),
+      ),
     );
   }
 
@@ -25,7 +29,6 @@ class CategorySidebar extends ConsumerWidget {
     WidgetRef ref,
     List<ChannelGroup> groups,
     String? selectedCategory,
-    ColorScheme colorScheme,
   ) {
     final totalChannels =
         groups.fold<int>(0, (sum, g) => sum + g.count);
@@ -39,11 +42,13 @@ class CategorySidebar extends ConsumerWidget {
           label: 'Todos',
           count: totalChannels,
           isSelected: selectedCategory == null,
-          colorScheme: colorScheme,
           onTap: () =>
               ref.read(selectedCategoryProvider.notifier).state = null,
         ),
-        const Divider(indent: 16, endIndent: 16),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+          child: Divider(height: 1),
+        ),
         // Group categories
         for (final group in groups)
           _CategoryTile(
@@ -51,7 +56,6 @@ class CategorySidebar extends ConsumerWidget {
             label: group.name,
             count: group.count,
             isSelected: selectedCategory == group.name,
-            colorScheme: colorScheme,
             onTap: () => ref.read(selectedCategoryProvider.notifier).state =
                 group.name,
           ),
@@ -84,19 +88,20 @@ class CategorySidebar extends ConsumerWidget {
     if (lower.contains('vh1')) return Icons.audiotrack;
     if (lower.contains('entret')) return Icons.theater_comedy;
     if (lower.contains('varied')) return Icons.dashboard;
-    if (lower.contains('usa') || lower.contains('uk') || lower.contains('canada')) {
+    if (lower.contains('usa') ||
+        lower.contains('uk') ||
+        lower.contains('canada')) {
       return Icons.public;
     }
     return Icons.live_tv;
   }
 }
 
-class _CategoryTile extends StatelessWidget {
+class _CategoryTile extends StatefulWidget {
   final IconData icon;
   final String label;
   final int count;
   final bool isSelected;
-  final ColorScheme colorScheme;
   final VoidCallback onTap;
 
   const _CategoryTile({
@@ -104,50 +109,104 @@ class _CategoryTile extends StatelessWidget {
     required this.label,
     required this.count,
     required this.isSelected,
-    required this.colorScheme,
     required this.onTap,
   });
 
   @override
+  State<_CategoryTile> createState() => _CategoryTileState();
+}
+
+class _CategoryTileState extends State<_CategoryTile> {
+  bool _isFocused = false;
+
+  @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final isActive = widget.isSelected || _isFocused;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-      child: ListTile(
-        dense: true,
-        leading: Icon(
-          icon,
-          size: 20,
-          color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: widget.isSelected
+              ? colors.primary.withValues(alpha: 0.12)
+              : _isFocused
+                  ? colors.surfaceContainerHigh
+                  : Colors.transparent,
+          border: _isFocused && !widget.isSelected
+              ? Border.all(color: colors.primary.withValues(alpha: 0.4), width: 1)
+              : null,
         ),
-        title: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            color: isSelected ? colorScheme.primary : colorScheme.onSurface,
-          ),
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? colorScheme.primaryContainer
-                : colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            '$count',
-            style: TextStyle(
-              fontSize: 11,
-              color: isSelected
-                  ? colorScheme.onPrimaryContainer
-                  : colorScheme.onSurfaceVariant,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: widget.onTap,
+          onFocusChange: (f) => setState(() => _isFocused = f),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                // Accent indicator bar
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 3,
+                  height: 20,
+                  margin: const EdgeInsets.only(right: 10),
+                  decoration: BoxDecoration(
+                    color: widget.isSelected
+                        ? colors.primary
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Icon(
+                  widget.icon,
+                  size: 18,
+                  color: isActive
+                      ? colors.primary
+                      : colors.onSurfaceVariant,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    widget.label,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight:
+                          isActive ? FontWeight.w600 : FontWeight.normal,
+                      color: isActive
+                          ? colors.onSurface
+                          : colors.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: widget.isSelected
+                        ? colors.primary.withValues(alpha: 0.2)
+                        : const Color(0xFF222222),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '${widget.count}',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: widget.isSelected
+                          ? colors.primary
+                          : const Color(0xFF666666),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-        selected: isSelected,
-        selectedTileColor: colorScheme.primaryContainer.withValues(alpha: 0.3),
-        onTap: onTap,
       ),
     );
   }

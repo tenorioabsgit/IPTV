@@ -1,37 +1,132 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<component name="MainScene" extends="Scene">
+<component name="MainScene" extends="Scene"
+    backgroundColor="0x0D0D0DFF"
+    backgroundUri="">
     <script type="text/brightscript" uri="pkg:/components/MainScene.brs" />
 
     <children>
-        <!-- Dark background -->
+        <!-- Deep dark background -->
         <Rectangle
             id="background"
             width="1920"
             height="1080"
-            color="0x1A1A2EFF" />
+            color="0x0D0D0DFF" />
 
-        <!-- Header -->
-        <Rectangle
-            id="header"
-            width="1920"
-            height="80"
-            color="0x16213EFF"
-            translation="[0, 0]">
+        <!-- ===== HEADER BAR ===== -->
+        <Group id="headerGroup" translation="[90, 22]">
             <Label
                 id="appTitle"
-                text="IPTV Player"
-                translation="[40, 18]"
+                text="IPTV"
                 font="font:LargeBoldSystemFont"
                 color="0x00D4FFFF" />
             <Label
+                id="appSubtitle"
+                text="Player"
+                translation="[95, 6]"
+                font="font:MediumSystemFont"
+                color="0x555555FF" />
+            <Label
                 id="channelCount"
-                text="Carregando..."
-                translation="[300, 26]"
+                text=""
+                translation="[1640, 10]"
                 font="font:SmallSystemFont"
-                color="0x888888FF" />
-        </Rectangle>
+                color="0x444444FF"
+                horizAlign="right"
+                width="100" />
+        </Group>
 
-        <!-- Loading spinner -->
+        <!-- Subtle header separator -->
+        <Rectangle
+            translation="[90, 62]"
+            width="1740"
+            height="1"
+            color="0x1A1A1AFF" />
+
+        <!-- ===== HERO BANNER ===== -->
+        <Group id="heroGroup" translation="[0, 72]" visible="false">
+            <!-- Hero background (elevated surface) -->
+            <Rectangle
+                id="heroBg"
+                translation="[0, 0]"
+                width="1920"
+                height="300"
+                color="0x111111FF" />
+
+            <!-- Accent stripe at top of hero -->
+            <Rectangle
+                translation="[0, 0]"
+                width="1920"
+                height="2"
+                color="0x00D4FF40" />
+
+            <!-- Channel poster in hero -->
+            <Poster
+                id="heroPoster"
+                translation="[110, 50]"
+                width="180"
+                height="180"
+                loadDisplayMode="scaleToFit"
+                loadingBitmapOpacity="0.0"
+                failedBitmapOpacity="0.0" />
+
+            <!-- Accent underline below poster -->
+            <Rectangle
+                id="heroAccentLine"
+                translation="[110, 238]"
+                width="180"
+                height="3"
+                color="0x00D4FFFF" />
+
+            <!-- Channel info text block -->
+            <Label
+                id="heroChannelName"
+                translation="[330, 60]"
+                text=""
+                font="font:LargeBoldSystemFont"
+                color="0xEEEEEEFF"
+                maxLines="2"
+                width="900" />
+
+            <Label
+                id="heroCategory"
+                translation="[330, 130]"
+                text=""
+                font="font:MediumSystemFont"
+                color="0x666666FF"
+                maxLines="1"
+                width="600" />
+
+            <!-- Live indicator -->
+            <Group id="liveIndicatorGroup" translation="[330, 180]">
+                <Rectangle
+                    width="10"
+                    height="10"
+                    translation="[0, 7]"
+                    color="0xFF3333FF" />
+                <Label
+                    text="AO VIVO"
+                    translation="[18, 0]"
+                    font="font:SmallBoldSystemFont"
+                    color="0xFF3333FF" />
+            </Group>
+
+            <!-- Play hint -->
+            <Label
+                id="heroHint"
+                translation="[330, 225]"
+                text="Pressione OK para assistir"
+                font="font:SmallSystemFont"
+                color="0x444444FF" />
+
+            <!-- Bottom separator -->
+            <Rectangle
+                translation="[90, 292]"
+                width="1740"
+                height="1"
+                color="0x1A1A1AFF" />
+        </Group>
+
+        <!-- ===== LOADING SPINNER ===== -->
         <LayoutGroup
             id="loadingGroup"
             translation="[860, 490]"
@@ -46,63 +141,28 @@
                 id="loadingLabel"
                 text="Carregando canais..."
                 font="font:MediumSystemFont"
-                color="0xCCCCCCFF" />
+                color="0x555555FF" />
         </LayoutGroup>
 
-        <!-- Category list (left panel) -->
-        <Rectangle
-            id="categoryPanel"
-            width="320"
-            height="980"
-            color="0x0F3460FF"
-            translation="[0, 80]"
-            visible="false">
-            <Label
-                id="catTitle"
-                text="Categorias"
-                translation="[20, 15]"
-                font="font:MediumBoldSystemFont"
-                color="0x00D4FFFF" />
-            <LabelList
-                id="categoryList"
-                translation="[20, 60]"
-                itemSize="[280, 48]"
-                numRows="18"
-                itemSpacing="[0, 4]"
-                focusedColor="0xFFFFFFFF"
-                color="0xAAAAAAFF"
-                focusBitmapBlendColor="0x00D4FF80"
-                drawFocusFeedback="true" />
-        </Rectangle>
+        <!-- ===== CONTENT ROWS (Netflix/Prime Video style) ===== -->
+        <RowList
+            id="rowList"
+            translation="[90, 380]"
+            itemComponentName="ChannelCard"
+            numRows="2"
+            rowItemSize="[[260, 170]]"
+            itemSpacing="[[20, 0]]"
+            rowSpacing="[0, 50]"
+            showRowLabel="[true]"
+            rowLabelOffset="[[0, 12]]"
+            rowLabelColor="0xAAAAAAFF"
+            rowLabelFont="font:MediumBoldSystemFont"
+            drawFocusFeedback="false"
+            rowFocusAnimationStyle="floatingFocus"
+            vertFocusAnimationStyle="floatingFocus"
+            visible="false" />
 
-        <!-- Channel grid (right panel) -->
-        <Rectangle
-            id="gridPanel"
-            width="1580"
-            height="980"
-            color="0x1A1A2E00"
-            translation="[340, 80]"
-            visible="false">
-            <Label
-                id="gridTitle"
-                text=""
-                translation="[20, 10]"
-                font="font:MediumBoldSystemFont"
-                color="0xFFFFFFFF" />
-            <PosterGrid
-                id="channelGrid"
-                translation="[20, 55]"
-                basePosterSize="[220, 160]"
-                itemSpacing="[15, 15]"
-                numColumns="6"
-                numRows="5"
-                caption1NumLines="2"
-                caption1Color="0xDDDDDDFF"
-                caption1Font="font:SmallSystemFont"
-                focusBitmapBlendColor="0x00D4FFFF" />
-        </Rectangle>
-
-        <!-- Video player overlay -->
+        <!-- ===== VIDEO PLAYER OVERLAY ===== -->
         <VideoPlayer
             id="videoPlayer"
             visible="false"
