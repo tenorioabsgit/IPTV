@@ -142,6 +142,6 @@ if __name__ == "__main__":
     create_splash(1920, 1080, "splash-screen_fhd.png")  # FHD: 1920x1080
 
     # UI assets
-    create_card_overlay(260, 85, "card-overlay.png")    # Channel card gradient overlay
+    create_card_overlay(300, 90, "card-overlay.png")    # Channel card gradient overlay
 
     print("All images created successfully!")

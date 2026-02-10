@@ -40,7 +40,11 @@
       "Bash(cmd /c \"set JAVA_HOME=C:\\\\Program Files\\\\Microsoft\\\\jdk-17.0.18.8-hotspot && set PATH=C:\\\\flutter\\\\bin;C:\\\\Android\\\\cmdline-tools\\\\latest\\\\bin;C:\\\\Android\\\\platform-tools;%JAVA_HOME%\\\\bin;%PATH% && set ANDROID_HOME=C:\\\\Android && set ANDROID_SDK_ROOT=C:\\\\Android && cd /d c:\\\\Projetos\\\\iptv\\\\app && C:\\\\flutter\\\\bin\\\\flutter build apk --release\")",
       "Bash(cmd.exe:*)",
       "Bash(JAVA_HOME=\"/c/Program Files/Microsoft/jdk-17.0.18.8-hotspot\" ANDROID_HOME=\"/c/Android\" ANDROID_SDK_ROOT=\"/c/Android\" PATH=\"/c/flutter/bin:/c/Android/cmdline-tools/latest/bin:/c/Android/platform-tools:/c/Program Files/Microsoft/jdk-17.0.18.8-hotspot/bin:$PATH\" /c/flutter/bin/flutter build apk:*)",
-      "Bash(PATH=\"/c/flutter/bin:$PATH\" /c/flutter/bin/flutter build:*)"
+      "Bash(PATH=\"/c/flutter/bin:$PATH\" /c/flutter/bin/flutter build:*)",
+      "Bash(git -C \"c:\\\\Users\\\\tenor\\\\Projetos\\\\iptv\" log --oneline -10)",
+      "Bash(git -C \"c:\\\\Users\\\\tenor\\\\Projetos\\\\iptv\" status)",
+      "Bash(unzip:*)",
+      "Bash(curl:*)"
     ]
   }
 }

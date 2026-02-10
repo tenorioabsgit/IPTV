@@ -101,13 +101,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Scaffold(
         body: Padding(
           padding: Platform.isAndroid ? overscan : EdgeInsets.zero,
-          child: Row(
-            children: [
-              // Sidebar
-              Container(
-                width: 240,
-                color: const Color(0xFF111111),
-                child: FocusTraversalGroup(
+          child: FocusTraversalGroup(
+            policy: ReadingOrderTraversalPolicy(),
+            child: Row(
+              children: [
+                // Sidebar
+                Container(
+                  width: 240,
+                  color: const Color(0xFF111111),
                   child: Column(
                     children: [
                       _buildSidebarHeader(),
@@ -115,32 +116,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ],
                   ),
                 ),
-              ),
-              // Subtle divider
-              Container(width: 1, color: const Color(0xFF1E1E1E)),
-              // Channel list (main focus area)
-              Expanded(
-                flex: 3,
-                child: FocusTraversalGroup(
+                // Subtle divider
+                Container(width: 1, color: const Color(0xFF1E1E1E)),
+                // Channel list (main focus area)
+                Expanded(
+                  flex: 3,
                   child: Column(
                     children: [
-                      _buildTopBar(),
+                      ExcludeFocus(child: _buildTopBar()),
                       Expanded(child: _buildChannelContent()),
                     ],
                   ),
                 ),
-              ),
-              // Player panel
-              if (hasActiveChannel) ...[
-                Container(width: 1, color: const Color(0xFF1E1E1E)),
-                SizedBox(
-                  width: 420,
-                  child: FocusTraversalGroup(
+                // Player panel
+                if (hasActiveChannel) ...[
+                  Container(width: 1, color: const Color(0xFF1E1E1E)),
+                  SizedBox(
+                    width: 420,
                     child: _buildPlayerPanel(),
                   ),
-                ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
@@ -438,30 +435,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildGrid(List<Channel> channels) {
     final crossAxisCount = _isDesktop ? 4 : 3;
-    return FocusTraversalGroup(
-      policy: WidgetOrderTraversalPolicy(),
-      child: GridView.builder(
-        padding: const EdgeInsets.all(12),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          childAspectRatio: 1.35,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-        ),
-        itemCount: channels.length,
-        itemBuilder: (_, i) => ChannelCard(channel: channels[i]),
+    return GridView.builder(
+      padding: const EdgeInsets.all(12),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        childAspectRatio: 1.35,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
       ),
+      itemCount: channels.length,
+      itemBuilder: (_, i) => ChannelCard(channel: channels[i]),
     );
   }
 
   Widget _buildList(List<Channel> channels) {
-    return FocusTraversalGroup(
-      policy: WidgetOrderTraversalPolicy(),
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        itemCount: channels.length,
-        itemBuilder: (_, i) => ChannelListTile(channel: channels[i]),
-      ),
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      itemCount: channels.length,
+      itemBuilder: (_, i) => ChannelListTile(channel: channels[i]),
     );
   }
 

@@ -13,23 +13,23 @@
         <Rectangle
             id="focusBorder"
             translation="[-3, -3]"
-            width="266"
-            height="176"
+            width="306"
+            height="186"
             color="0x00D4FFFF"
             opacity="0.0" />
 
         <!-- Card background -->
         <Rectangle
             id="cardBg"
-            width="260"
-            height="170"
+            width="300"
+            height="180"
             color="0x1A1A1AFF">
 
             <!-- Channel poster/logo -->
             <Poster
                 id="poster"
-                width="260"
-                height="170"
+                width="300"
+                height="180"
                 loadDisplayMode="scaleToZoom"
                 loadingBitmapOpacity="0.0"
                 failedBitmapOpacity="0.0" />
@@ -37,15 +37,15 @@
             <!-- No-poster fallback: dark card with initial letter -->
             <Rectangle
                 id="noPosterBg"
-                width="260"
-                height="170"
+                width="300"
+                height="180"
                 color="0x141414FF"
                 visible="false">
                 <Label
                     id="noPosterLetter"
-                    translation="[0, 30]"
-                    width="260"
-                    height="100"
+                    translation="[0, 35]"
+                    width="300"
+                    height="110"
                     font="font:LargeBoldSystemFont"
                     color="0x333333FF"
                     horizAlign="center"
@@ -55,19 +55,19 @@
             <!-- Bottom gradient overlay for text readability -->
             <Poster
                 id="gradientOverlay"
-                translation="[0, 85]"
-                width="260"
-                height="85"
+                translation="[0, 90]"
+                width="300"
+                height="90"
                 uri="pkg:/images/card-overlay.png"
                 loadDisplayMode="scaleToFill" />
 
             <!-- Channel name at bottom -->
             <Label
                 id="channelName"
-                translation="[12, 140]"
+                translation="[12, 148]"
                 font="font:SmallBoldSystemFont"
                 color="0xE5E5E5FF"
-                width="236"
+                width="276"
                 height="24"
                 maxLines="1" />
         </Rectangle>
