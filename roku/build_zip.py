@@ -1,20 +1,42 @@
-import zipfile
+#!/usr/bin/env python3
+"""Build SepulnationTV Roku app as a deployable ZIP package."""
+
 import os
+import zipfile
 
-basedir = os.path.dirname(os.path.abspath(__file__))
-zippath = os.path.join(basedir, 'iptv-roku.zip')
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_ZIP = os.path.join(SCRIPT_DIR, "SepulnationTV.zip")
 
-if os.path.exists(zippath):
-    os.remove(zippath)
+INCLUDE_DIRS = ["source", "components", "images"]
+INCLUDE_FILES = ["manifest"]
 
-with zipfile.ZipFile(zippath, 'w', zipfile.ZIP_DEFLATED) as zf:
-    for root, dirs, files in os.walk(basedir):
-        for f in files:
-            if f.endswith(('.zip', '.py')):
+
+def build():
+    with zipfile.ZipFile(OUTPUT_ZIP, "w", zipfile.ZIP_DEFLATED) as zf:
+        # Add top-level files
+        for fname in INCLUDE_FILES:
+            fpath = os.path.join(SCRIPT_DIR, fname)
+            if os.path.exists(fpath):
+                zf.write(fpath, fname)
+                print(f"  + {fname}")
+
+        # Add directories recursively
+        for dirname in INCLUDE_DIRS:
+            dirpath = os.path.join(SCRIPT_DIR, dirname)
+            if not os.path.isdir(dirpath):
+                print(f"  ! Missing directory: {dirname}")
                 continue
-            filepath = os.path.join(root, f)
-            arcname = os.path.relpath(filepath, basedir).replace(os.sep, '/')
-            zf.write(filepath, arcname)
-            print(f'  + {arcname}')
+            for root, _, files in os.walk(dirpath):
+                for f in files:
+                    filepath = os.path.join(root, f)
+                    arcname = os.path.relpath(filepath, SCRIPT_DIR)
+                    zf.write(filepath, arcname)
+                    print(f"  + {arcname}")
 
-print(f'ZIP criado: {zippath}')
+    size_kb = os.path.getsize(OUTPUT_ZIP) / 1024
+    print(f"\nBuild complete: {OUTPUT_ZIP} ({size_kb:.1f} KB)")
+
+
+if __name__ == "__main__":
+    print("Building SepulnationTV Roku app...\n")
+    build()

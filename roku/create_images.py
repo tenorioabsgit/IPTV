@@ -1,147 +1,145 @@
-"""Generate Roku channel images: posters, splash screens, and UI assets."""
-from PIL import Image, ImageDraw, ImageFont
+"""
+Generate placeholder images for the SepulnationTV Roku channel.
+
+Images produced:
+  - icon_focus_hd.png   336x210   (focused channel icon, HD)
+  - icon_focus_sd.png   246x140   (focused channel icon, SD)
+  - splash_hd.png      1280x720   (splash screen, HD)
+  - splash_fhd.png     1920x1080  (splash screen, FHD)
+
+All images use a dark background (#0D0D0D) with cyan (#00E5FF) accent
+text and a thin horizontal accent line.
+"""
+
 import os
+from pathlib import Path
 
-IMAGES_DIR = os.path.join(os.path.dirname(__file__), "images")
+from PIL import Image, ImageDraw, ImageFont
 
-# New premium dark color scheme
-BG_COLOR = (13, 13, 13)         # #0D0D0D - near black
-SURFACE_COLOR = (22, 22, 22)    # #161616 - elevated surface
-ACCENT_COLOR = (0, 212, 255)    # #00D4FF - cyan accent
-TEXT_COLOR = (229, 229, 229)    # #E5E5E5 - off-white
-TEXT_DIM = (85, 85, 85)         # #555555 - muted text
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
+BG_COLOR = "#0D0D0D"
+ACCENT_COLOR = "#00E5FF"
+APP_NAME = "SepulnationTV"
+
+IMAGES = [
+    # (filename, width, height, kind)
+    ("icon_focus_hd.png", 336, 210, "icon"),
+    ("icon_focus_sd.png", 246, 140, "icon"),
+    ("splash_hd.png", 1280, 720, "splash"),
+    ("splash_fhd.png", 1920, 1080, "splash"),
+]
+
+OUTPUT_DIR = Path(__file__).resolve().parent / "images"
 
 
-def draw_rounded_rect(draw, xy, radius, fill):
-    x0, y0, x1, y1 = xy
-    draw.rectangle([x0 + radius, y0, x1 - radius, y1], fill=fill)
-    draw.rectangle([x0, y0 + radius, x1, y1 - radius], fill=fill)
-    draw.pieslice([x0, y0, x0 + 2 * radius, y0 + 2 * radius], 180, 270, fill=fill)
-    draw.pieslice([x1 - 2 * radius, y0, x1, y0 + 2 * radius], 270, 360, fill=fill)
-    draw.pieslice([x0, y1 - 2 * radius, x0 + 2 * radius, y1], 90, 180, fill=fill)
-    draw.pieslice([x1 - 2 * radius, y1 - 2 * radius, x1, y1], 0, 90, fill=fill)
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
-
-def draw_play_icon(draw, cx, cy, size, color):
-    """Draw a modern play triangle."""
-    half = size // 2
-    pts = [
-        (cx - half // 2, cy - half),
-        (cx - half // 2, cy + half),
-        (cx + half, cy),
+def _best_font(size):
+    """Return the best available font at the requested pixel size."""
+    candidates = [
+        "C:/Windows/Fonts/arialbd.ttf",
+        "C:/Windows/Fonts/arial.ttf",
+        "C:/Windows/Fonts/segoeui.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
     ]
-    draw.polygon(pts, fill=color)
+    for path in candidates:
+        if os.path.isfile(path):
+            return ImageFont.truetype(path, size)
+    # Fall back to Pillow's built-in bitmap font.
+    return ImageFont.load_default()
 
 
-def create_poster(width, height, filename):
-    """Create channel poster icon with premium dark design."""
-    img = Image.new("RGBA", (width, height), BG_COLOR + (255,))
+def _draw_icon(img):
+    """Draw a simple branded icon (small image)."""
+    w, h = img.size
     draw = ImageDraw.Draw(img)
 
-    # Subtle border
-    draw.rectangle([0, 0, width - 1, height - 1], outline=ACCENT_COLOR + (100,), width=2)
+    # Choose a font size proportional to the image height.
+    font_size = max(14, h // 6)
+    font = _best_font(font_size)
 
-    # Play icon centered
-    icon_size = min(width, height) // 3
-    draw_play_icon(draw, width // 2, height // 2 - 12, icon_size, ACCENT_COLOR)
-
-    # Accent line below icon
-    line_w = width // 3
-    draw.rectangle(
-        [width // 2 - line_w // 2, height // 2 + icon_size // 2 + 5,
-         width // 2 + line_w // 2, height // 2 + icon_size // 2 + 8],
-        fill=ACCENT_COLOR
+    # --- Accent line (horizontal, near the bottom third) ---
+    line_y = int(h * 0.72)
+    line_margin = int(w * 0.15)
+    draw.line(
+        [(line_margin, line_y), (w - line_margin, line_y)],
+        fill=ACCENT_COLOR,
+        width=2,
     )
 
-    try:
-        font_big = ImageFont.truetype("arial.ttf", max(16, height // 7))
-        font_small = ImageFont.truetype("arial.ttf", max(12, height // 10))
-    except OSError:
-        font_big = ImageFont.load_default()
-        font_small = ImageFont.load_default()
-
-    # "Pira" text
-    text = "Pira"
-    bbox = draw.textbbox((0, 0), text, font=font_big)
-    tw = bbox[2] - bbox[0]
-    draw.text((width // 2 - tw // 2, height - 52), text, fill=ACCENT_COLOR, font=font_big)
-
-    # "IPTV" text
-    text2 = "IPTV"
-    bbox2 = draw.textbbox((0, 0), text2, font=font_small)
-    tw2 = bbox2[2] - bbox2[0]
-    draw.text((width // 2 - tw2 // 2, height - 28), text2, fill=TEXT_DIM, font=font_small)
-
-    img.save(os.path.join(IMAGES_DIR, filename))
-    print(f"Created {filename} ({width}x{height})")
+    # --- App name centred above the line ---
+    bbox = draw.textbbox((0, 0), APP_NAME, font=font)
+    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    tx = (w - tw) // 2
+    ty = (line_y - th) // 2
+    draw.text((tx, ty), APP_NAME, fill=ACCENT_COLOR, font=font)
 
 
-def create_splash(width, height, filename):
-    """Create splash screen with cinematic dark design."""
-    img = Image.new("RGBA", (width, height), BG_COLOR + (255,))
+def _draw_splash(img):
+    """Draw a branded splash screen (large image)."""
+    w, h = img.size
     draw = ImageDraw.Draw(img)
 
-    # Central panel - subtle elevated surface
-    pw, ph = width // 3, height // 4
-    px = width // 2 - pw // 2
-    py = height // 2 - ph // 2
-    draw_rounded_rect(draw, (px, py, px + pw, py + ph), 16, SURFACE_COLOR + (220,))
+    # --- Title ---
+    title_size = max(28, h // 10)
+    title_font = _best_font(title_size)
 
-    # Accent line at top of panel
-    draw.rectangle([px, py, px + pw, py + 3], fill=ACCENT_COLOR)
+    bbox = draw.textbbox((0, 0), APP_NAME, font=title_font)
+    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    tx = (w - tw) // 2
+    ty = int(h * 0.38) - th // 2
+    draw.text((tx, ty), APP_NAME, fill=ACCENT_COLOR, font=title_font)
 
-    # Play icon
-    icon_size = min(pw, ph) // 3
-    draw_play_icon(draw, width // 2, height // 2 - 25, icon_size, ACCENT_COLOR)
+    # --- Accent line below the title ---
+    line_y = ty + th + int(h * 0.04)
+    line_half = int(w * 0.18)
+    cx = w // 2
+    draw.line(
+        [(cx - line_half, line_y), (cx + line_half, line_y)],
+        fill=ACCENT_COLOR,
+        width=3,
+    )
 
-    try:
-        font_title = ImageFont.truetype("arial.ttf", max(24, height // 15))
-        font_sub = ImageFont.truetype("arial.ttf", max(16, height // 25))
-    except OSError:
-        font_title = ImageFont.load_default()
-        font_sub = ImageFont.load_default()
-
-    # "Pira IPTV"
-    title = "Pira IPTV"
-    bbox = draw.textbbox((0, 0), title, font=font_title)
-    tw = bbox[2] - bbox[0]
-    draw.text((width // 2 - tw // 2, height // 2 + 30), title, fill=ACCENT_COLOR, font=font_title)
-
-    # "Canais ao vivo"
-    sub = "Canais ao vivo"
-    bbox2 = draw.textbbox((0, 0), sub, font=font_sub)
-    tw2 = bbox2[2] - bbox2[0]
-    draw.text((width // 2 - tw2 // 2, height // 2 + 75), sub, fill=TEXT_DIM, font=font_sub)
-
-    img.save(os.path.join(IMAGES_DIR, filename))
-    print(f"Created {filename} ({width}x{height})")
+    # --- Subtitle ---
+    sub_size = max(16, h // 30)
+    sub_font = _best_font(sub_size)
+    subtitle = "IPTV Streaming"
+    bbox_s = draw.textbbox((0, 0), subtitle, font=sub_font)
+    sw = bbox_s[2] - bbox_s[0]
+    draw.text(
+        ((w - sw) // 2, line_y + int(h * 0.04)),
+        subtitle,
+        fill=ACCENT_COLOR,
+        font=sub_font,
+    )
 
 
-def create_card_overlay(width, height, filename):
-    """Create a vertical gradient from transparent to dark for channel card overlays."""
-    img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
-    for y in range(height):
-        progress = y / max(height - 1, 1)
-        # Exponential curve for smoother gradient
-        alpha = int(210 * (progress ** 1.4))
-        draw.line([(0, y), (width - 1, y)], fill=(0, 0, 0, alpha))
-    img.save(os.path.join(IMAGES_DIR, filename))
-    print(f"Created {filename} ({width}x{height})")
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+def main():
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    for filename, width, height, kind in IMAGES:
+        img = Image.new("RGBA", (width, height), BG_COLOR)
+
+        if kind == "icon":
+            _draw_icon(img)
+        else:
+            _draw_splash(img)
+
+        dest = OUTPUT_DIR / filename
+        img.save(dest)
+        print(f"  Created {dest}  ({width}x{height})")
+
+    print("\nDone. All images saved to", OUTPUT_DIR)
 
 
 if __name__ == "__main__":
-    os.makedirs(IMAGES_DIR, exist_ok=True)
-
-    # Channel posters (Roku requirements)
-    create_poster(336, 210, "channel-poster_hd.png")   # HD poster: 336x210
-    create_poster(246, 140, "channel-poster_sd.png")   # SD poster: 246x140
-
-    # Splash screens
-    create_splash(1280, 720, "splash-screen_hd.png")    # HD: 1280x720
-    create_splash(1920, 1080, "splash-screen_fhd.png")  # FHD: 1920x1080
-
-    # UI assets
-    create_card_overlay(300, 90, "card-overlay.png")    # Channel card gradient overlay
-
-    print("All images created successfully!")
+    main()
