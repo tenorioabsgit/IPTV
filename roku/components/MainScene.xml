@@ -16,13 +16,13 @@
         <Group id="headerGroup" translation="[90, 22]">
             <Label
                 id="appTitle"
-                text="Pira"
+                text="Sepulnation"
                 font="font:LargeBoldSystemFont"
                 color="0x00D4FFFF" />
             <Label
                 id="appSubtitle"
-                text="IPTV"
-                translation="[95, 6]"
+                text="TV"
+                translation="[255, 6]"
                 font="font:MediumSystemFont"
                 color="0x555555FF" />
             <Label
