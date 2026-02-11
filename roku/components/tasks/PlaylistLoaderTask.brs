@@ -41,31 +41,23 @@ sub GetContent()
     channels = ParseM3U(lines)
     groups = GroupChannels(channels)
 
-    rootChildren = []
-
-    ' first row: all channels
-    allRow = {}
-    allRow.title = "Todos (" + IntToStr(channels.Count()) + ")"
-    allRow.children = []
-    for each ch in channels
-        allRow.children.Push(GetChannelData(ch))
-    end for
-    rootChildren.Push(allRow)
-
-    ' per-group rows
-    for each grp in groups
-        row = {}
-        row.title = grp.name + " (" + IntToStr(grp.channels.Count()) + ")"
-        row.children = []
-        for each ch in grp.channels
-            row.children.Push(GetChannelData(ch))
-        end for
-        rootChildren.Push(row)
-    end for
-
-    ' set up root ContentNode to represent rowList on GridScreen
+    ' build per-group rows (skip "Todos" — too many items freezes the RowList)
+    MAX_ITEMS_PER_ROW = 150
     contentNode = CreateObject("roSGNode", "ContentNode")
-    contentNode.Update({ children: rootChildren }, true)
+
+    for each grp in groups
+        rowNode = CreateObject("roSGNode", "ContentNode")
+        rowNode.title = grp.name + " (" + IntToStr(grp.channels.Count()) + ")"
+        itemCount = 0
+        for each ch in grp.channels
+            if itemCount >= MAX_ITEMS_PER_ROW then exit for
+            itemNode = CreateObject("roSGNode", "ContentNode")
+            itemNode.SetFields(GetChannelData(ch))
+            rowNode.AppendChild(itemNode)
+            itemCount = itemCount + 1
+        end for
+        contentNode.AppendChild(rowNode)
+    end for
 
     print "SepulnationTV: Loaded " + IntToStr(channels.Count()) + " channels"
     ' populate content field - observer is invoked at that moment
