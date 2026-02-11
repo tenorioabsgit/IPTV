@@ -40,6 +40,10 @@ sub OnVideoVisibleChange()
         m.videoPlayer.content = invalid
         screen = GetCurrentScreen()
         screen.SetFocus(true)
-        screen.jumpToItem = currentIndex + m.selectedIndex[1]
+        if screen.HasField("jumpToItem")
+            screen.jumpToItem = currentIndex + m.selectedIndex[1]
+        else if screen.HasField("jumpToRowItem")
+            m.GridScreen.jumpToRowItem = [m.selectedIndex[0], currentIndex + m.selectedIndex[1]]
+        end if
     end if
 end sub
