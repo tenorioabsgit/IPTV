@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <style name="AppTheme" parent="Theme.Leanback">
-        <item name="android:windowBackground">@color/background</item>
-        <item name="android:colorBackground">@color/background</item>
-        <item name="defaultBrandColor">@color/brand_color</item>
-    </style>
-</resources>

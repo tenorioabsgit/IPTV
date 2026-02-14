@@ -1,3 +1,0 @@
--keep class com.sepulnationtv.model.** { *; }
--keep class androidx.media3.** { *; }
--dontwarn com.bumptech.glide.**
