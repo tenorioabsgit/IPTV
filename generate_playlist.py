@@ -105,21 +105,9 @@ SOURCES = {
     },
 
     # EUA (apsattv.com)
-    'roku_us': {
-        'name': 'Roku Channel',
-        'url': 'https://www.apsattv.com/rok.m3u',
-        'type': 'direct_m3u',
-        'region': 'US',
-    },
     'firetv_us': {
         'name': 'Amazon Fire TV',
         'url': 'https://www.apsattv.com/firetv.m3u',
-        'type': 'direct_m3u',
-        'region': 'US',
-    },
-    'xumo_us': {
-        'name': 'XUMO',
-        'url': 'https://www.apsattv.com/xumo.m3u',
         'type': 'direct_m3u',
         'region': 'US',
     },
@@ -143,6 +131,18 @@ SOURCES = {
     },
 
     # EUA (BuddyChewChew)
+    'roku_us': {
+        'name': 'Roku Channel',
+        'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/roku_all.m3u',
+        'type': 'direct_m3u',
+        'region': 'US',
+    },
+    'xumo_us': {
+        'name': 'XUMO',
+        'url': 'https://raw.githubusercontent.com/BuddyChewChew/xumo-playlist-generator/refs/heads/main/playlists/xumo_playlist.m3u',
+        'type': 'direct_m3u',
+        'region': 'US',
+    }, 
     'tubi_us': {
         'name': 'Tubi TV',
         'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/tubi_all.m3u',
