@@ -5,10 +5,8 @@ Executa automaticamente via GitHub Actions
 URL fixa: https://raw.githubusercontent.com/tenorioabsgit/iptv/main/playlist.m3u
 """
 
+import re
 import requests
-import gzip
-import json
-from io import BytesIO
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import multiprocessing
@@ -18,41 +16,44 @@ import multiprocessing
 # ============================================================
 
 SOURCES = {
+    # ============================================================
+    # BRASIL
+    # ============================================================
+
     # Brasil (apsattv.com)
     'samsung_br': {
         'name': 'Samsung TV Plus Brasil',
         'url': 'https://www.apsattv.com/ssungbra.m3u',
-        'type': 'direct_m3u',
         'region': 'BR',
     },
     'lg_br': {
         'name': 'LG Channels Brasil',
         'url': 'https://www.apsattv.com/brlg.m3u',
-        'type': 'direct_m3u',
         'region': 'BR',
     },
     'tcl_br': {
         'name': 'TCL Brasil',
         'url': 'https://www.apsattv.com/tclbr.m3u',
-        'type': 'direct_m3u',
         'region': 'BR',
     },
     'soultv_br': {
         'name': 'Soul TV Brasil',
         'url': 'https://www.apsattv.com/soultv.m3u',
-        'type': 'direct_m3u',
         'region': 'BR',
     },
     'redeitv_br': {
         'name': 'Rede iTV Brasil',
         'url': 'https://www.apsattv.com/redeitv.m3u',
-        'type': 'direct_m3u',
         'region': 'BR',
     },
     'movieark_br': {
         'name': 'Movieark Brasil',
         'url': 'https://www.apsattv.com/moviearkbr.m3u',
-        'type': 'direct_m3u',
+        'region': 'BR',
+    },
+    'vidaa_br': {
+        'name': 'Vidaa TV',
+        'url': 'https://www.apsattv.com/vidaa.m3u',
         'region': 'BR',
     },
 
@@ -60,105 +61,103 @@ SOURCES = {
     'iptv_org_br': {
         'name': 'IPTV-Org Brasil',
         'url': 'https://iptv-org.github.io/iptv/countries/br.m3u',
-        'type': 'direct_m3u',
         'region': 'BR',
     },
     'freetv_br': {
         'name': 'Free-TV Brasil',
         'url': 'https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_brazil.m3u8',
-        'type': 'direct_m3u',
         'region': 'BR',
     },
     'fta_br': {
         'name': 'FTA-IPTV Brasil',
         'url': 'https://raw.githubusercontent.com/joaoguidugli/FTA-IPTV-Brasil/master/playlist.m3u8',
-        'type': 'direct_m3u',
         'region': 'BR',
     },
 
-    # Brasil (Pluto TV)
+    # Brasil (BuddyChewChew)
     'plutotv_br': {
         'name': 'Pluto TV Brasil',
         'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/plutotv_br.m3u',
-        'type': 'direct_m3u',
         'region': 'BR',
     },
 
-    # Plex Free Live TV (BuddyChewChew)
-    'plex_us': {
-        'name': 'Plex TV US',
-        'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/plex_us.m3u',
-        'type': 'direct_m3u',
-        'region': 'US',
-    },
-    'plex_ca': {
-        'name': 'Plex TV CA',
-        'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/plex_ca.m3u',
-        'type': 'direct_m3u',
-        'region': 'CA',
-    },
-    'plex_gb': {
-        'name': 'Plex TV UK',
-        'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/plex_gb.m3u',
-        'type': 'direct_m3u',
-        'region': 'GB',
+    # Lingua Portuguesa - todos os paises (GitHub)
+    'iptv_org_por': {
+        'name': 'IPTV-Org Português',
+        'url': 'https://iptv-org.github.io/iptv/languages/por.m3u',
+        'region': 'BR',
     },
 
+    # ============================================================
+    # EUA
+    # ============================================================
+
     # EUA (apsattv.com)
-    'roku_us': {
-        'name': 'Roku Channel',
-        'url': 'https://www.apsattv.com/rok.m3u',
-        'type': 'direct_m3u',
-        'region': 'US',
-    },
-    'firetv_us': {
-        'name': 'Amazon Fire TV',
-        'url': 'https://www.apsattv.com/firetv.m3u',
-        'type': 'direct_m3u',
-        'region': 'US',
-    },
-    'xumo_us': {
-        'name': 'XUMO',
-        'url': 'https://www.apsattv.com/xumo.m3u',
-        'type': 'direct_m3u',
-        'region': 'US',
-    },
     'localnow_us': {
         'name': 'Local Now',
         'url': 'https://www.apsattv.com/localnow.m3u',
-        'type': 'direct_m3u',
         'region': 'US',
     },
     'distrotv': {
         'name': 'DistroTV',
         'url': 'https://www.apsattv.com/distro.m3u',
-        'type': 'direct_m3u',
         'region': 'US',
     },
     'vizio_us': {
         'name': 'Vizio TV',
         'url': 'https://www.apsattv.com/vizio.m3u',
-        'type': 'direct_m3u',
+        'region': 'US',
+    },
+    'firetv_us': {
+        'name': 'Amazon Fire TV',
+        'url': 'https://www.apsattv.com/firetv.m3u',
+        'region': 'US',
+    },
+    'lg_us': {
+        'name': 'LG Channels US',
+        'url': 'https://www.apsattv.com/uslg.m3u',
+        'region': 'US',
+    },
+    'metax_us': {
+        'name': 'Metax',
+        'url': 'https://www.apsattv.com/metax.m3u',
+        'region': 'US',
+    },
+    'hp_us': {
+        'name': 'HP Fast Channels',
+        'url': 'https://www.apsattv.com/hp.m3u',
+        'region': 'US',
+    },
+    'tablo_us': {
+        'name': 'Tablo',
+        'url': 'https://www.apsattv.com/tablo.m3u',
         'region': 'US',
     },
 
     # EUA (BuddyChewChew)
+    'samsung_us': {
+        'name': 'Samsung TV Plus US',
+        'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/samsungtvplus_us.m3u',
+        'region': 'US',
+    },
+    'roku_us': {
+        'name': 'Roku Channel',
+        'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/roku_all.m3u',
+        'region': 'US',
+    },
+    'plex_us': {
+        'name': 'Plex TV US',
+        'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/plex_us.m3u',
+        'region': 'US',
+    },
     'tubi_us': {
         'name': 'Tubi TV',
         'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/tubi_all.m3u',
-        'type': 'direct_m3u',
-        'region': 'US',
-    },
-    'stirr_us': {
-        'name': 'Stirr TV',
-        'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/stirr_all.m3u',
-        'type': 'direct_m3u',
         'region': 'US',
     },
     'plutotv_us': {
         'name': 'Pluto TV US',
         'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/plutotv_us.m3u',
-        'type': 'direct_m3u',
         'region': 'US',
     },
 
@@ -166,228 +165,236 @@ SOURCES = {
     'iptv_org_us': {
         'name': 'IPTV-Org US',
         'url': 'https://iptv-org.github.io/iptv/countries/us.m3u',
-        'type': 'direct_m3u',
         'region': 'US',
     },
     'freetv_us': {
         'name': 'Free-TV USA',
         'url': 'https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_usa.m3u8',
-        'type': 'direct_m3u',
         'region': 'US',
     },
 
-    # Canada (apsattv.com)
+    # ============================================================
+    # CANADA
+    # ============================================================
+
     'lg_ca': {
         'name': 'LG Channels CA',
         'url': 'https://www.apsattv.com/calg.m3u',
-        'type': 'direct_m3u',
         'region': 'CA',
     },
-
-    # Canada (BuddyChewChew)
+    'samsung_ca': {
+        'name': 'Samsung TV Plus CA',
+        'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/samsungtvplus_ca.m3u',
+        'region': 'CA',
+    },
+    'plex_ca': {
+        'name': 'Plex TV CA',
+        'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/plex_ca.m3u',
+        'region': 'CA',
+    },
     'plutotv_ca': {
         'name': 'Pluto TV CA',
         'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/plutotv_ca.m3u',
-        'type': 'direct_m3u',
         'region': 'CA',
     },
-
-    # Canada (GitHub agregadores)
     'iptv_org_ca': {
         'name': 'IPTV-Org CA',
         'url': 'https://iptv-org.github.io/iptv/countries/ca.m3u',
-        'type': 'direct_m3u',
         'region': 'CA',
     },
     'freetv_ca': {
         'name': 'Free-TV Canada',
         'url': 'https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_canada.m3u8',
-        'type': 'direct_m3u',
         'region': 'CA',
     },
 
-    # UK (apsattv.com)
+    # ============================================================
+    # UK
+    # ============================================================
+
     'lg_gb': {
         'name': 'LG Channels UK',
         'url': 'https://www.apsattv.com/gblg.m3u',
-        'type': 'direct_m3u',
         'region': 'GB',
     },
-
-    # UK (BuddyChewChew)
+    'samsung_gb': {
+        'name': 'Samsung TV Plus UK',
+        'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/samsungtvplus_gb.m3u',
+        'region': 'GB',
+    },
+    'plex_gb': {
+        'name': 'Plex TV UK',
+        'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/plex_gb.m3u',
+        'region': 'GB',
+    },
     'plutotv_gb': {
         'name': 'Pluto TV UK',
         'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/plutotv_gb.m3u',
-        'type': 'direct_m3u',
         'region': 'GB',
     },
-
-    # UK (GitHub agregadores)
     'iptv_org_gb': {
         'name': 'IPTV-Org UK',
         'url': 'https://iptv-org.github.io/iptv/countries/uk.m3u',
-        'type': 'direct_m3u',
         'region': 'GB',
     },
     'freetv_gb': {
         'name': 'Free-TV UK',
         'url': 'https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_uk.m3u8',
-        'type': 'direct_m3u',
         'region': 'GB',
     },
 
-    # Brasil (apsattv.com) - adicional
-    'vidaa_br': {
-        'name': 'Vidaa TV',
-        'url': 'https://www.apsattv.com/vidaa.m3u',
-        'type': 'direct_m3u',
-        'region': 'BR',
-    },
+    # ============================================================
+    # AUSTRALIA
+    # ============================================================
 
-    # Australia (apsattv.com)
     'samsung_au': {
         'name': 'Samsung TV Plus AU',
         'url': 'https://www.apsattv.com/ssungaus.m3u',
-        'type': 'direct_m3u',
         'region': 'AU',
     },
     'lg_au': {
         'name': 'LG Channels AU',
         'url': 'https://www.apsattv.com/aulg.m3u',
-        'type': 'direct_m3u',
         'region': 'AU',
     },
     '9fast_au': {
         'name': '9Fast AU',
         'url': 'https://www.apsattv.com/9fast.m3u',
-        'type': 'direct_m3u',
         'region': 'AU',
     },
-    'koganplus_au': {
-        'name': 'Koganplus AU',
-        'url': 'https://www.apsattv.com/koganplus.m3u',
-        'type': 'direct_m3u',
+    'kogantvplus_au': {
+        'name': 'Kogantvplus AU',
+        'url': 'https://www.apsattv.com/kogantvplus.m3u',
         'region': 'AU',
     },
-
-    # Australia (BuddyChewChew / GitHub)
     'plex_au': {
         'name': 'Plex TV AU',
         'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/plex_au.m3u',
-        'type': 'direct_m3u',
         'region': 'AU',
     },
     'iptv_org_au': {
         'name': 'IPTV-Org AU',
         'url': 'https://iptv-org.github.io/iptv/countries/au.m3u',
-        'type': 'direct_m3u',
         'region': 'AU',
     },
     'freetv_au': {
         'name': 'Free-TV Australia',
         'url': 'https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_australia.m3u8',
-        'type': 'direct_m3u',
         'region': 'AU',
     },
 
-    # Nova Zelandia (apsattv.com)
+    # ============================================================
+    # NOVA ZELANDIA
+    # ============================================================
+
     'samsung_nz': {
         'name': 'Samsung TV Plus NZ',
         'url': 'https://www.apsattv.com/ssungnz.m3u',
-        'type': 'direct_m3u',
         'region': 'NZ',
     },
     'lg_nz': {
         'name': 'LG Channels NZ',
         'url': 'https://www.apsattv.com/nzlg.m3u',
-        'type': 'direct_m3u',
         'region': 'NZ',
     },
-
-    # Nova Zelandia (BuddyChewChew / GitHub)
     'plex_nz': {
         'name': 'Plex TV NZ',
         'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/plex_nz.m3u',
-        'type': 'direct_m3u',
         'region': 'NZ',
     },
     'iptv_org_nz': {
         'name': 'IPTV-Org NZ',
         'url': 'https://iptv-org.github.io/iptv/countries/nz.m3u',
-        'type': 'direct_m3u',
         'region': 'NZ',
     },
 
-    # Portugal (apsattv.com)
+    # ============================================================
+    # PORTUGAL
+    # ============================================================
+
     'samsung_pt': {
         'name': 'Samsung TV Plus PT',
         'url': 'https://www.apsattv.com/ssungpor.m3u',
-        'type': 'direct_m3u',
         'region': 'PT',
     },
     'lg_pt': {
         'name': 'LG Channels PT',
         'url': 'https://www.apsattv.com/ptlg.m3u',
-        'type': 'direct_m3u',
         'region': 'PT',
     },
-
-    # Portugal (GitHub)
     'm3upt': {
         'name': 'M3UPT Portugal',
         'url': 'https://raw.githubusercontent.com/LITUATUI/M3UPT/main/M3U/M3UPT.m3u',
-        'type': 'direct_m3u',
         'region': 'PT',
     },
     'iptv_org_pt': {
         'name': 'IPTV-Org PT',
         'url': 'https://iptv-org.github.io/iptv/countries/pt.m3u',
-        'type': 'direct_m3u',
         'region': 'PT',
     },
     'freetv_pt': {
         'name': 'Free-TV Portugal',
         'url': 'https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_portugal.m3u8',
-        'type': 'direct_m3u',
         'region': 'PT',
     },
 
-    # Lusofonia Africana (GitHub agregadores)
+    # ============================================================
+    # LUSOFONIA AFRICANA
+    # ============================================================
+
     'iptv_org_ao': {
         'name': 'IPTV-Org Angola',
         'url': 'https://iptv-org.github.io/iptv/countries/ao.m3u',
-        'type': 'direct_m3u',
         'region': 'AO',
     },
     'iptv_org_mz': {
         'name': 'IPTV-Org Moçambique',
         'url': 'https://iptv-org.github.io/iptv/countries/mz.m3u',
-        'type': 'direct_m3u',
         'region': 'MZ',
     },
     'iptv_org_cv': {
         'name': 'IPTV-Org Cabo Verde',
         'url': 'https://iptv-org.github.io/iptv/countries/cv.m3u',
-        'type': 'direct_m3u',
         'region': 'CV',
     },
 
-    # Lingua Portuguesa - todos os paises (GitHub)
-    'iptv_org_por': {
-        'name': 'IPTV-Org Português',
-        'url': 'https://iptv-org.github.io/iptv/languages/por.m3u',
-        'type': 'direct_m3u',
-        'region': 'BR',
-    },
+    # ============================================================
+    # MULTI-REGIAO / GLOBAL
+    # ============================================================
 
-    # Samsung TV Plus (i.mjh.nz)
-    'samsung_us': {'name': 'Samsung TV Plus US', 'region': 'us', 'type': 'mjh'},
-    'samsung_gb': {'name': 'Samsung TV Plus UK', 'region': 'gb', 'type': 'mjh'},
-    'samsung_ca': {'name': 'Samsung TV Plus CA', 'region': 'ca', 'type': 'mjh'},
+    'whaletvplus': {
+        'name': 'Whale TV Plus',
+        'url': 'https://www.apsattv.com/whaletvplus_all.m3u',
+        'region': 'US',
+    },
+    'tclplus': {
+        'name': 'TCL TV Plus Global',
+        'url': 'https://www.apsattv.com/tclplus.m3u',
+        'region': 'US',
+    },
+    'freelivesports': {
+        'name': 'Free Live Sports',
+        'url': 'https://www.apsattv.com/freelivesports.m3u',
+        'region': 'US',
+    },
+    'samsungtvplus_all': {
+        'name': 'Samsung TV Plus All',
+        'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/samsungtvplus_all.m3u',
+        'region': 'US',
+    },
+    'plex_all': {
+        'name': 'Plex TV All',
+        'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/plex_all.m3u',
+        'region': 'US',
+    },
+    'plutotv_all': {
+        'name': 'Pluto TV All',
+        'url': 'https://raw.githubusercontent.com/BuddyChewChew/app-m3u-generator/refs/heads/main/playlists/plutotv_all.m3u',
+        'region': 'US',
+    },
 }
 
-MJH_CHANNELS_URL = 'https://i.mjh.nz/SamsungTVPlus/.channels.json.gz'
-TARGET_REGIONS = ['BR', 'US', 'GB', 'CA', 'AU', 'NZ', 'PT', 'AO', 'MZ', 'CV', 'us', 'gb', 'ca']
+TARGET_REGIONS = ['BR', 'US', 'GB', 'CA', 'AU', 'NZ', 'PT', 'AO', 'MZ', 'CV']
 OUTPUT_FILE = 'playlist.m3u'
 
 # Canais extras (VH1 e MTV) adicionados manualmente
@@ -445,13 +452,9 @@ EXTRA_CHANNELS = [
 # Mapeamento de região para nome do país
 REGION_TO_COUNTRY = {
     'BR': 'Brasil',
-    'br': 'Brasil',
     'US': 'USA',
-    'us': 'USA',
     'GB': 'UK',
-    'gb': 'UK',
     'CA': 'Canada',
-    'ca': 'Canada',
     'AU': 'Australia',
     'NZ': 'New Zealand',
     'PT': 'Português',
@@ -604,7 +607,6 @@ def get_final_group(original_group, region, channel_name=''):
     # VH1 e MTV são categorias globais (qualquer região)
     if 'vh1' in name_lower:
         return 'VH1'
-    import re
     if re.search(r'\bmtv\b', name_lower):
         return 'MTV'
 
@@ -633,21 +635,18 @@ def get_final_group(original_group, region, channel_name=''):
 
 def extract_group_from_extinf(extinf_line):
     """Extrai o group-title de uma linha EXTINF."""
-    import re
     match = re.search(r'group-title="([^"]*)"', extinf_line)
     return match.group(1) if match else ''
 
 
 def extract_logo_from_extinf(extinf_line):
     """Extrai o tvg-logo de uma linha EXTINF."""
-    import re
     match = re.search(r'tvg-logo="([^"]*)"', extinf_line)
     return match.group(1) if match else ''
 
 
 def update_extinf_group(extinf_line, new_group):
     """Atualiza o group-title em uma linha EXTINF."""
-    import re
     if 'group-title="' in extinf_line:
         return re.sub(r'group-title="[^"]*"', f'group-title="{new_group}"', extinf_line)
     else:
@@ -655,8 +654,8 @@ def update_extinf_group(extinf_line, new_group):
         return extinf_line.replace('#EXTINF:-1 ', f'#EXTINF:-1 group-title="{new_group}" ')
 
 
-def download_direct_m3u(url, name):
-    """Baixa uma playlist M3U diretamente."""
+def download_m3u(url, name):
+    """Baixa uma playlist M3U."""
     print(f"  Baixando {name}...")
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
 
@@ -670,23 +669,6 @@ def download_direct_m3u(url, name):
     except Exception as e:
         print(f"    ERRO: {e}")
         return None, 0
-
-
-def download_mjh_data():
-    """Baixa dados do i.mjh.nz."""
-    print("  Baixando dados Samsung TV Plus (i.mjh.nz)...")
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-
-    try:
-        response = requests.get(MJH_CHANNELS_URL, headers=headers, timeout=30)
-        response.raise_for_status()
-        with gzip.GzipFile(fileobj=BytesIO(response.content)) as f:
-            data = json.loads(f.read().decode('utf-8'))
-        print("    OK!")
-        return data
-    except Exception as e:
-        print(f"    ERRO: {e}")
-        return None
 
 
 def parse_m3u_to_channels(content, source_name, region):
@@ -713,41 +695,6 @@ def parse_m3u_to_channels(content, source_name, region):
                 'logo': logo
             })
             current_extinf = None
-
-    return channels
-
-
-def generate_mjh_channels(data, region, source_name):
-    """Gera lista de canais a partir do i.mjh.nz."""
-    regions_data = data.get('regions', {})
-    if region not in regions_data:
-        return []
-
-    region_info = regions_data[region]
-    channels_data = region_info.get('channels', {})
-    slug_template = data.get('slug', 'stvp-{id}')
-
-    channels = []
-    for channel_id, channel_info in channels_data.items():
-        name = channel_info.get('name', 'Unknown')
-        chno = channel_info.get('chno', 0)
-        group = channel_info.get('group', 'Other')
-        logo = channel_info.get('logo', '')
-
-        slug = slug_template.replace('{id}', channel_id)
-        stream_url = f"https://jmp2.uk/{slug}"
-
-        extinf = f'#EXTINF:-1 tvg-id="{channel_id}" tvg-name="{name}" tvg-logo="{logo}" tvg-chno="{chno}" group-title="{group}",{name}'
-
-        channels.append({
-            'name': name,
-            'url': stream_url,
-            'extinf': extinf,
-            'source': source_name,
-            'region': region,
-            'original_group': group,
-            'logo': logo
-        })
 
     return channels
 
@@ -820,30 +767,25 @@ def collect_all_channels():
     print("\nColetando canais...")
 
     all_channels = []
-    mjh_data = None
 
-    needs_mjh = any(s.get('type') == 'mjh' for s in SOURCES.values())
-    if needs_mjh:
-        mjh_data = download_mjh_data()
-
-    for source_key, source in SOURCES.items():
+    # Download paralelo de todas as fontes
+    def fetch_source(source_key, source):
         region = source.get('region', '')
         if region not in TARGET_REGIONS:
-            continue
+            return []
+        content, count = download_m3u(source['url'], source['name'])
+        if content:
+            return parse_m3u_to_channels(content, source['name'], region)
+        return []
 
-        source_type = source.get('type')
-
-        if source_type == 'direct_m3u':
-            content, count = download_direct_m3u(source['url'], source['name'])
-            if content:
-                channels = parse_m3u_to_channels(content, source['name'], region)
-                all_channels.extend(channels)
-
-        elif source_type == 'mjh' and mjh_data:
-            print(f"  Processando {source['name']}...")
-            channels = generate_mjh_channels(mjh_data, region, source['name'])
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        futures = {
+            executor.submit(fetch_source, key, src): key
+            for key, src in SOURCES.items()
+        }
+        for future in as_completed(futures):
+            channels = future.result()
             all_channels.extend(channels)
-            print(f"    OK! ({len(channels)} canais)")
 
     # Adicionar canais extras (VH1, MTV)
     if EXTRA_CHANNELS:
