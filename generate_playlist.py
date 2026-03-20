@@ -464,6 +464,7 @@ BR_NEWS_KEYWORDS = [
     '011 news', 'canal uol', 'norte news', 'bandnews',
     'tv 247', 'times brasil', 'canal rural', 'notícias agrícolas',
     'noticias agricolas', 'new brasil', 'terraviva', 'veja mais',
+    'euronews portugu', 'breaking news',
 ]
 
 # Ordem de relevância para BR Noticias (menor = mais relevante)
@@ -480,6 +481,8 @@ NEWS_RELEVANCE = [
     'terraviva',
     'new brasil',
     'veja mais',
+    'euronews portugu',
+    'breaking news',
     'notícias agrícolas',
     'noticias agricolas',
     'tv 247',
@@ -565,9 +568,12 @@ def update_extinf_group(extinf_line, new_group):
     """Atualiza o group-title em uma linha EXTINF."""
     if 'group-title="' in extinf_line:
         return re.sub(r'group-title="[^"]*"', f'group-title="{new_group}"', extinf_line)
+    elif '#EXTINF:-1,' in extinf_line and '#EXTINF:-1 ' not in extinf_line:
+        # Sem atributos: #EXTINF:-1,Name → adiciona group-title antes da vírgula
+        return extinf_line.replace('#EXTINF:-1,', f'#EXTINF:-1 group-title="{new_group}",', 1)
     else:
-        # Adiciona group-title se não existir
-        return extinf_line.replace('#EXTINF:-1 ', f'#EXTINF:-1 group-title="{new_group}" ')
+        # Tem atributos mas sem group-title: #EXTINF:-1 tvg-id="...",Name
+        return extinf_line.replace('#EXTINF:-1 ', f'#EXTINF:-1 group-title="{new_group}" ', 1)
 
 
 def download_m3u(url, name):
