@@ -449,334 +449,24 @@ EXTRA_CHANNELS = [
     {'name': 'Now Rock AU', 'url': 'https://lightningnow90-samsungau.amagi.tv/playlist.m3u8', 'region': 'AU', 'source': 'Now Music/Amagi'},
 ]
 
-# Mapeamento de região para nome do país
-REGION_TO_COUNTRY = {
-    'BR': 'Brasil',
-    'US': 'USA',
-    'GB': 'UK',
-    'CA': 'Canada',
-    'AU': 'Australia',
-    'NZ': 'New Zealand',
-    'PT': 'Português',
-    'AO': 'Português',
-    'MZ': 'Português',
-    'CV': 'Português',
-}
-
 # ============================================================
-# CLASSIFICACAO DE CANAIS
+# CLASSIFICACAO DE CANAIS - 5 grupos simplificados
 # ============================================================
+# 1. BR Noticias  - Canais de notícias brasileiros
+# 2. BR           - Todos os outros canais brasileiros
+# 3. US           - Canais dos EUA
+# 4. CA           - Canais do Canadá
+# 5. Others       - Todo o resto
 
-# Classificação de canais brasileiros por categoria
-# Ordem importa: a primeira categoria que bater ganha
-BR_CATEGORIES = [
-    ('BR Legislativo', [
-        'tv câmara', 'tv camara', 'tv justiça', 'tv justica', 'alerj', 'almg', 'alesp',
-        'canal gov', 'tv senado', 'erga omnes', 'câmara lins', 'camara lins',
-    ]),
-    ('BR Anime', [
-        'naruto', 'death note', 'hunter x hunter', 'one piece', 'boruto', 'yu-gi-oh',
-        'pokémon', 'pokemon', 'beyblade', 'inuyasha', 'jojo', 'anime', 'tokusato',
-        'super onze', 'dragon ball', 'shippuden', 'otaku sign',
-    ]),
-    ('BR Kids', [
-        'nick jr', 'nickelodeon', 'turma da mônica', 'turma da monica', 'bob esponja',
-        'dpa', 'cocoricó', 'cocorico', 'teletubbies', 'smurfs', 'tartarugas ninja',
-        'reino infantil', 'padrinhos mágicos', 'padrinhos magicos', 'popeye',
-        'oggy', 'jetsons', 'inspetor bugiganga', 'icarly', 'kenan', 'babyfirst',
-        'moranguinho', 'pluto tv junior', 'pluto tv kids', 'kids club',
-        'gospel cartoon', 'ministério infantil', 'ministerio infantil', 'dm kids',
-        'f. kids', 'kids mais',
-    ]),
-    ('BR Notícias', [
-        'cnn brasil', 'jovem pan', 'record news', 'sbt news', 'bm&c news',
-        '011 news', 'canal uol', 'norte news', 'bandnews',
-        'tv 247', 'times brasil', 'canal rural', 'notícias agrícolas',
-        'noticias agricolas', 'new brasil', 'terraviva', 'veja mais',
-    ]),
-    ('BR Esportes', [
-        'fifa', 'dazn', 'pfl mma', 'fuel tv', 'racer', 'ge tv', 'sft combat',
-        'kickboxing', 'esporte', 'sport', 'baseball', 'billiard', 'poker',
-        'combat', 'horse', 'play tv horse', 'playtv horse', 'unique sports',
-        'rs sports', 'trace sport', 'people are awesome', 'speedvision',
-        'motorvision', 'pluto tv turbo', 'pluto tv esportes', 'auto tv',
-    ]),
-    ('BR Filmes', [
-        'pluto tv cine', 'pluto tv filmes', 'filmelier', 'darkflix', 'cinemonde',
-        'adrenalina pura', 'filmes suspense', 'cine sucessos', 'cine comédia',
-        'cine comedia', 'cine drama', 'cine terror', 'cine clássicos', 'cine classicos',
-        'cine romance', 'cine família', 'cine familia', 'ficção científica',
-        'ficcao cientifica', 'filmes nacionais', 'filmes aventura', 'filmes ação',
-        'filmes acão', 'filmes de luta', 'cine crime', 'cine inspiração',
-        'cine inspiracao', 'sony one cinema', 'movieark', 'clube do terror',
-        'terror trash', 'pluto tv bang bang', 'pluto tv policial', 'netmovies',
-        'runtime', 'tu cine', 'freetv acción', 'freetv accion', 'freetv drama',
-        'freetv terror', 'freetv familia', 'freetv sureño', 'freetv sureno',
-        'spark tv luz', 'gospel movie',
-    ]),
-    ('BR Séries', [
-        'walking dead', 'csi', 'ncis', 'charmed', 'macgyver', 'jornada nas estrelas',
-        'star trek', 'z nation', 'rookie blue', 'numbers', 'feiticeira',
-        'pluto tv séries', 'pluto tv series', 'séries classic', 'series classic',
-        'diff\'rent strokes', 'pluto tv novelas', 'séries novelescas',
-        'caçadora de relíquias', 'cacadora de reliquias', 'mistérios sem solução',
-        'misterios sem solucao', 'pluto tv retrô', 'pluto tv retro',
-        'pluto tv investigação', 'pluto tv investigacao', 'arquivos do fbi',
-        'estado paranormal', 'caçadores de óvnis', 'cacadores de ovnis',
-        'assombrações', 'assombracoes', 'pluto tv mistérios', 'pluto tv misterios',
-        'pluto tv aliens', 'detetives médicos', 'detetives medicos',
-        'pronto-socorro', 'acumuladores', 'pluto tv vida real', 'pluto tv curiosidade',
-        'obsessão favorita', 'obsessao favorita', 'negócio fechado', 'negocio fechado',
-        'homem que veio do céu', 'homem que veio do ceu',
-    ]),
-    ('BR Entretenimento', [
-        'comedy central', 'failarmy', 'masterchef', 'south park',
-        'pegadinhas', 'just for laughs', 'shark tank', 'encantador de cães',
-        'encantador de caes', 'pluto tv animais', 'pet collective', 'fashiontv',
-        'caras tv', 'pluto tv história', 'pluto tv historia', 'smithsonian',
-        'pluto tv natureza', 'nature time', 'weatherspy', 'pluto tv cozinha',
-        'kfood', 'gusto tv', 'receitas fast', 'tastemade', 'pluto tv viagens',
-        'gousa', 'arirang', 'bet pluto', 'pluto tv gaming', 'realmadrid tv',
-        'geekdot', 'salon line', 'sony one emoções', 'sony one emocoes',
-        'malhacao', 'malhação', 'novela',
-    ]),
-    ('BR Religiosas', [
-        'aparecida', 'canção nova', 'cancao nova', 'rit tv', 'rittv', 'evangelizar',
-        'novo tempo', 'gospel', 'igreja', 'católica', 'catolica', 'cristão', 'cristao',
-        'promessas', 'pai eterno', 'terceiro anjo', 'avivando', 'apóstolos', 'apostolos',
-        'imjc', 'kuriakos', 'adorador', 'adorar', 'katholika', 'família de jesus',
-        'familia de jesus', 'maanaim', 'manancial', 'tv sbn', 'angel tv',
-        'caminho antigo', 'tv alpha', 'web tv catolica', 'unifé', 'unife',
-        'tv feliz', 'tenda tv',
-    ]),
-    ('BR Música', [
-        'stingray', 'karaokê', 'karaoke', 'forró', 'forro', 'sertanejo',
-        'pop retrô', 'pop retro', 'rock show', 'qwest tv', 'hits', 'kpop',
-        'classique tv', 'rede blitz',
-        'rádio forró', 'radio forro', 'hip-hop', 'hip hop', 'caipira',
-        'pluto tv shows por stingray', 'pluto tv paisagens', 'pluto tv karaokê',
-        'tikitok radio', 'tiktok radio',
-    ]),
-    ('BR TV Aberta', [
-        'recordtv', 'record tv', 'rede tv', 'redetv', 'sbt ', 'tv cultura',
-        'tv brasil', 'band ', 'rede globo', 'globo ', 'tv gazeta',
-        'tv bahia', 'tv grande natal', 'tv arapuan', 'tv marajoara',
-        'tv padre cicero', 'tv do povo', 'tv brusque', 'tv clube',
-        'tv aldeia', 'tv alternativa', 'tv futuro', 'tv guará',
-        'tv max', 'tv mais maricá', 'tv maná', 'sic tv',
-        'amazon sat', 'rede ngt', 'rede sptv', 'tv difusora',
-        'tv aliança', 'tv encontro das aguas', 'tv cidade verde',
-        'tv life america', 'cultura pará', 'canal educação',
-        'canal do inter', 'canal 38', 'fala litoral', 'sertão tv',
-        'plena tv', 'primer tv', 'catve', 'chroma tv',
-        'conectv', 'conexão tv', 'demais tv', 'despertar tv',
-        'eutv', 'elytv', 'fonte tv', 'nova era tv', 'stz tv',
-        'boas novas', 'com brasil', 'bdc tv', 'awtv', 'adesso tv',
-        'mytime movie', 'tv a folha',
-    ]),
-    ('BR Educação', [
-        'canal educação', 'tv escola', 'univesp', 'futura', 'canal saúde',
-        'canal saude', 'tv ufmg', 'tv usp',
-    ]),
+# Keywords para identificar canais de notícias brasileiros
+BR_NEWS_KEYWORDS = [
+    'cnn brasil', 'jovem pan', 'record news', 'sbt news', 'bm&c news',
+    '011 news', 'canal uol', 'norte news', 'bandnews',
+    'tv 247', 'times brasil', 'canal rural', 'notícias agrícolas',
+    'noticias agricolas', 'new brasil', 'terraviva', 'veja mais',
 ]
 
-# Mapeamento de group-titles originais das fontes para categorias padrão
-# (Pluto TV, Tubi, Vizio, DistroTV, IPTV-Org fornecem group-titles úteis)
-GROUP_TITLE_MAP = {
-    # News
-    'news': 'News', 'news + opinion': 'News', 'news + opinión': 'News',
-    'news & opinion': 'News', 'local news': 'News', 'national news': 'News',
-    'business news': 'News', 'global news': 'News', 'desi news': 'News',
-    'notícias': 'News', 'noticias': 'News',
-    'news;weather': 'News', 'weather': 'News',
-    # Sports
-    'sports': 'Sports', 'live sports': 'Sports', 'sports on now': 'Sports',
-    'esportes': 'Sports', 'mma & more': 'Sports', 'deportes': 'Sports',
-    # Movies
-    'movies': 'Movies', 'more movies': 'Movies', 'filmes': 'Movies',
-    'movie channels': 'Movies', 'westerns': 'Movies', 'películas': 'Movies',
-    'peliculas': 'Movies', 'classic shows & movies': 'Movies',
-    # Series / Drama
-    'drama': 'Series', 'crime drama': 'Series', 'bingeable drama': 'Series',
-    'tv dramas': 'Series', 'classic tv': 'Series', 'séries': 'Series',
-    'series': 'Series', 'classic tv comedy': 'Series',
-    # Comedy
-    'comedy': 'Comedy', 'comédia': 'Comedy', 'comedia': 'Comedy',
-    # Entertainment / Reality
-    'entertainment': 'Entertainment', 'reality': 'Entertainment',
-    'reality tv': 'Entertainment', 'competition reality': 'Entertainment',
-    'game shows': 'Entertainment', 'daytime + game shows': 'Entertainment',
-    'daytime & talk shows': 'Entertainment', 'games & competition': 'Entertainment',
-    'fun & games': 'Entertainment', 'pop culture': 'Entertainment',
-    'entretenimiento': 'Entertainment', 'desi entertainment': 'Entertainment',
-    'featured': 'Entertainment', 'new on pluto tv': 'Entertainment',
-    # Kids
-    'kids': 'Kids', 'kids + family': 'Kids', 'kids & family': 'Kids',
-    'infantil': 'Kids', 'nickelodeon': 'Kids', 'animation': 'Kids',
-    'animation;kids': 'Kids', 'education;kids': 'Kids',
-    # Music
-    'music': 'Music', 'music videos': 'Music', 'música': 'Music',
-    'musica': 'Music', 'moods': 'Music', 'mood + ambiance': 'Music',
-    # Crime / True Crime
-    'true crime': 'Crime', 'crime': 'Crime',
-    'investigação': 'Crime', 'investigacion': 'Crime',
-    # Sci-Fi / Paranormal
-    'sci-fi': 'Sci-Fi', 'sci-fi + fantasy': 'Sci-Fi',
-    'sci-fi & fantasy': 'Sci-Fi', 'sci-fi & supernatural': 'Sci-Fi',
-    'paranormal': 'Sci-Fi', 'mystery': 'Sci-Fi',
-    'misterios y sobrenatural': 'Sci-Fi',
-    'mistérios e sobrenatural': 'Sci-Fi',
-    # Documentary / History
-    'documentary': 'Documentary', 'documentaries': 'Documentary',
-    'documentary + science': 'Documentary', 'history + science': 'Documentary',
-    'history + docs': 'Documentary', 'documentales': 'Documentary',
-    # Lifestyle / Food / Home
-    'lifestyle': 'Lifestyle', 'lifestyle & wellness': 'Lifestyle',
-    'home + food': 'Lifestyle', 'food & travel': 'Lifestyle',
-    'food + travel': 'Lifestyle', 'living': 'Lifestyle', 'home': 'Lifestyle',
-    'estilo de vida': 'Lifestyle', 'good eats': 'Lifestyle',
-    'culture + lifestyle': 'Lifestyle', 'shopping': 'Lifestyle', 'shop': 'Lifestyle',
-    'curiosidades': 'Lifestyle', 'tv brasileira': 'Lifestyle',
-    # Nature / Outdoors
-    'animals + nature': 'Nature', 'nature + science': 'Nature',
-    'science & nature': 'Nature', 'natureza': 'Nature',
-    'outdoors': 'Nature', 'outdoor': 'Nature',
-    'real life adventure': 'Nature', 'nature': 'Nature',
-    # Religious
-    'religious': 'Religious', 'spirituality': 'Religious',
-    'inspiration + faith': 'Religious',
-    # Anime / Geek
-    'anime': 'Anime', 'anime & geek': 'Anime',
-    # Retro
-    'retrô': 'Retro', 'retro': 'Retro',
-    # En Español
-    'en español': 'En Español', 'en espanol': 'En Español',
-    'español': 'En Español', 'espanol': 'En Español',
-    # Regional / Culture
-    'african': 'Culture', 'culture': 'Culture', 'radio': 'Radio',
-    # Education
-    'education': 'Education', 'general': 'General',
-    # South Park (Pluto)
-    'south park': 'Comedy',
-    # MTV (Pluto BR)
-    'mtv': 'MTV',
-    # Novelas
-    'novelas': 'Series', 'novela': 'Series',
-    # Investigação
-    'investigação': 'Crime', 'investigacion': 'Crime',
-    # Jornada nas Estrelas (Pluto BR)
-    'jornada nas estrelas': 'Sci-Fi',
-}
-
-# Classificação genérica por palavras-chave no NOME do canal
-# Usada quando o group-title original é inútil (Plex, Roku, Samsung, etc.)
-# Ordem importa: mais específico primeiro
-NAME_CATEGORIES = [
-    # Anime (antes de Kids para evitar conflito)
-    ('Anime', [
-        'anime', 'crunchyroll', 'funimation', 'tokusato',
-    ]),
-    # News
-    ('News', [
-        'news', 'cnn', 'msnbc', 'cnbc', 'bloomberg', 'al jazeera', 'reuters',
-        'france 24', 'euronews', 'newsy', 'court tv', 'c-span', 'cspan',
-        'sky news', 'bbc news', 'abc news', 'cbs news', 'nbc news', 'fox news',
-        'newsmax', 'newsnation', 'weather channel', 'accuweather',
-        'notícias', 'noticias', 'jornal', 'telejornal',
-        'fox weather', 'livenow from fox', 'today all day', 'yahoo! finance',
-        'telemundo al dia', 'thegrio', 'oan ', 'roi tv',
-    ]),
-    # Sports
-    ('Sports', [
-        'espn', 'nfl network', 'nba tv', 'mlb network', 'nhl network',
-        'fox sport', 'bein sport', 'dazn', 'fuel tv', 'stadium',
-        'motorsport', 'racing', 'ufc', 'wwe', 'boxing',
-        'cricket', 'surfing', 'x games', 'outdoor channel',
-        'fight', 'pfl mma', 'sft combat', 'kickboxing',
-        'wired2fish', 'waypoint tv', 'outdoor america',
-    ]),
-    # Kids
-    ('Kids', [
-        'nick jr', 'nickelodeon', 'cartoon', 'disney', 'pbs kids', 'baby',
-        'junior', 'sesame', 'kids', 'children', 'lego', 'toon',
-        'mr. bean', 'three stooges', 'alf',
-    ]),
-    # Movies
-    ('Movies', [
-        'movie', 'cinema', 'film', 'hollywood', 'thriller',
-        'filmrise', 'fandango', 'amc',
-        'horror machine', 'screambox', 'scream factory', 'dark matter tv',
-        'cowboy classics', 'old west tv', 'wild west tv', 'lone star',
-        'urban action', 'conflict',
-    ]),
-    # Comedy
-    ('Comedy', [
-        'comedy', 'laugh', 'funny', 'stand-up', 'standup', 'south park',
-        'failarmy', 'just for laughs', 'roast',
-        'america\'s funniest', 'trailer park boys', 'red green show',
-    ]),
-    # Series / Drama
-    ('Series', [
-        'classic tv', 'retro tv', 'drama', 'soap', 'novela', 'telenovela',
-        'bold and the beautiful', 'jump street', 'operation repo',
-        'deal or no deal',
-    ]),
-    # Music
-    ('Music', [
-        'music', 'vevo', 'stingray', 'karaoke', 'hits', 'radio',
-        'hip hop', 'country music', 'jazz', 'classical music', 'reggae',
-        'kpop', 'latin music', 'concert', 'non-stop \'90s',
-    ]),
-    # Documentary / History
-    ('Documentary', [
-        'discovery', 'national geographic', 'nat geo', 'history channel',
-        'smithsonian', 'documentary', 'science channel',
-        'magellantv', 'cosmic frontiers', 'popular science',
-        'true history', 'history & warfare',
-    ]),
-    # Crime
-    ('Crime', [
-        'true crime', 'crime', 'investigation discovery', 'forensic',
-        'dateline', 'cold case', 'mysteria',
-    ]),
-    # Sci-Fi
-    ('Sci-Fi', [
-        'sci-fi', 'sci fi', 'syfy', 'paranormal', 'alien', 'supernatural',
-        'mystery science theater',
-    ]),
-    # Lifestyle / Home / Food
-    ('Lifestyle', [
-        'food', 'cooking', 'travel', 'home & garden', 'hgtv', 'design',
-        'fashion', 'beauty', 'health', 'fitness', 'yoga', 'diy',
-        'magnolia', 'bon appétit', 'bon appetit', 'tastemade',
-        'property', 'real estate', 'interior',
-        'gusto tv', 'homeful', 'at home with', 'spend smart', 'family handyman',
-        'popstar', 'loupe art', 'rvtv',
-    ]),
-    # Nature / Animals
-    ('Nature', [
-        'nature', 'animal', 'wildlife', 'planet earth', 'ocean',
-        'national park', 'safari',
-        'dog whisperer', 'pet collective', 'bark tv',
-        'great american adventures', 'wildest',
-    ]),
-    # Religious
-    ('Religious', [
-        'church', 'gospel', 'faith', 'christian', 'catholic', 'prayer',
-        'worship', 'daystar', 'tbn', 'god tv', 'hillsong', 'jesus',
-        'ewtn', 'hope channel', 'inspiration', 'uplift',
-        'joel osteen', 'jltv',
-    ]),
-    # Entertainment (catchall amplo - deve ficar por último)
-    ('Entertainment', [
-        'reality', 'game show', 'talk show', 'entertainment', 'bet ',
-        'bravo', 'e! ', 'tmz', 'buzzfeed', 'vice',
-        'drone tv', 'awe plus', 'envoy', 'the first',
-        'black enterprise', 'shout! tv',
-    ]),
-]
-
-# Ordem de relevância para BR Notícias (menor = mais relevante)
+# Ordem de relevância para BR Noticias (menor = mais relevante)
 NEWS_RELEVANCE = [
     'cnn brasil',
     'record news',
@@ -796,17 +486,6 @@ NEWS_RELEVANCE = [
     '011 news',
     'norte news',
 ]
-
-# Group-titles que são inúteis (genéricos demais, não indicam categoria)
-USELESS_GROUPS = {
-    '', 'plex', 'roku', 'uncategorized', 'undefined',
-    'united states', 'united kingdom', 'canada', 'germany', 'france',
-    'spain', 'italy', 'india', 'south korea', 'switzerland', 'austria',
-    'sweden', 'norway', 'denmark', 'finland', 'netherlands', 'belgium',
-    'ireland', 'luxembourg', 'brazil', 'brasil', 'portugal', 'australia',
-    'new zealand', 'singapore', 'philippines', 'thailand', 'mexico',
-    'general', 'other',
-}
 
 
 # ============================================================
@@ -848,80 +527,26 @@ def get_news_relevance(channel_name):
     return 999
 
 
-def classify_br_channel(channel_name):
-    """Classifica um canal brasileiro em subcategoria."""
-    name_lower = channel_name.lower()
-    for category, keywords in BR_CATEGORIES:
-        for kw in keywords:
-            if kw in name_lower:
-                return category
-    return 'BR Variedades'
-
-
-def normalize_group_title(original_group):
-    """Normaliza o group-title original da fonte para uma categoria padrão."""
-    if not original_group:
-        return None
-    group_lower = original_group.lower().strip()
-    if group_lower in USELESS_GROUPS:
-        return None
-    return GROUP_TITLE_MAP.get(group_lower)
-
-
-def classify_by_name(channel_name):
-    """Classifica canal por palavras-chave no nome."""
+def is_br_news(channel_name):
+    """Verifica se um canal brasileiro é de notícias."""
     name_lower = channel_name.lower() if channel_name else ''
-    for category, keywords in NAME_CATEGORIES:
-        for kw in keywords:
-            if kw in name_lower:
-                return category
-    return None
+    return any(kw in name_lower for kw in BR_NEWS_KEYWORDS)
 
 
 def get_final_group(original_group, region, channel_name=''):
-    """Determina o grupo final baseado no país, categoria ou música."""
-    name_lower = channel_name.lower() if channel_name else ''
+    """Determina o grupo final: BR Noticias, BR, US, CA ou Others."""
+    region_upper = region.upper() if region else ''
 
-    # VH1 e MTV são categorias globais (qualquer região)
-    if 'vh1' in name_lower:
-        return 'VH1'
-    if re.search(r'\bmtv\b', name_lower):
-        return 'MTV'
+    if region_upper == 'BR':
+        return 'BR Noticias' if is_br_news(channel_name) else 'BR'
 
-    # Rock/Metal é categoria global (qualquer região)
-    rock_keywords = [
-        'rock x metal', 'rock alternative', 'classic rock', 'electro rock',
-        'now rock', 'vevo rock', 'live music', 'rock tv', 'rock show',
-        'mtv rocks', 'rock!',
-    ]
-    if any(kw in name_lower for kw in rock_keywords):
-        return 'Rock'
+    if region_upper == 'US':
+        return 'US'
 
-    # Se for Brasil, usa classificação detalhada existente
-    if region.upper() == 'BR':
-        return classify_br_channel(channel_name)
+    if region_upper == 'CA':
+        return 'CA'
 
-    # Para demais regiões: tentar classificar em subcategoria
-    country = REGION_TO_COUNTRY.get(region, 'Other')
-
-    # 1) Tentar mapear pelo group-title original da fonte
-    category = normalize_group_title(original_group)
-
-    # 2) Se não deu, classificar pelo nome do canal
-    if not category:
-        category = classify_by_name(channel_name)
-
-    # 3) Se classificou, formata como "País Category"
-    if category:
-        # Music é global (não prefixar com país)
-        if category == 'Music':
-            return 'Music'
-        if category == 'MTV':
-            return 'MTV'
-        return f'{country} {category}'
-
-    # 4) Fallback: só o país
-    return country
+    return 'Others'
 
 
 def extract_group_from_extinf(extinf_line):
@@ -1133,7 +758,7 @@ def generate_m3u_content(channels):
         enriched.append((ch, final_group))
 
     # Ordenar BR Notícias por relevância
-    enriched.sort(key=lambda x: get_news_relevance(x[0].get('name', '')) if x[1] == 'BR Notícias' else 999)
+    enriched.sort(key=lambda x: get_news_relevance(x[0].get('name', '')) if x[1] == 'BR Noticias' else 999)
 
     for ch, final_group in enriched:
         updated_extinf = update_extinf_group(ch['extinf'], final_group)
