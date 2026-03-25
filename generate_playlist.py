@@ -450,13 +450,14 @@ EXTRA_CHANNELS = [
 ]
 
 # ============================================================
-# CLASSIFICACAO DE CANAIS - 5 grupos simplificados
+# CLASSIFICACAO DE CANAIS
 # ============================================================
-# 1. BR Noticias  - Canais de notícias brasileiros
-# 2. BR           - Todos os outros canais brasileiros
-# 3. US           - Canais dos EUA
-# 4. CA           - Canais do Canadá
-# 5. Others       - Todo o resto
+# 1. BR Noticias              - Canais de notícias brasileiros
+# 2. <Nome do serviço> (BR)   - Canais BR agrupados pelo serviço de origem
+#                                (ex: Samsung TV Plus Brasil, LG Channels Brasil, etc.)
+# 3. US                       - Canais dos EUA
+# 4. CA                       - Canais do Canadá
+# 5. Others                   - Todo o resto
 
 # Keywords para identificar canais de notícias brasileiros
 BR_NEWS_KEYWORDS = [
@@ -536,12 +537,14 @@ def is_br_news(channel_name):
     return any(kw in name_lower for kw in BR_NEWS_KEYWORDS)
 
 
-def get_final_group(original_group, region, channel_name=''):
-    """Determina o grupo final: BR Noticias, BR, US, CA ou Others."""
+def get_final_group(original_group, region, channel_name='', source=''):
+    """Determina o grupo final: BR Noticias, nome do serviço (BR), US, CA ou Others."""
     region_upper = region.upper() if region else ''
 
     if region_upper == 'BR':
-        return 'BR Noticias' if is_br_news(channel_name) else 'BR'
+        if is_br_news(channel_name):
+            return 'BR Noticias'
+        return source if source else 'BR'
 
     if region_upper == 'US':
         return 'US'
@@ -760,7 +763,8 @@ def generate_m3u_content(channels):
         original_group = ch.get('original_group', '')
         region = ch.get('region', '')
         channel_name = ch.get('name', '')
-        final_group = get_final_group(original_group, region, channel_name)
+        source = ch.get('source', '')
+        final_group = get_final_group(original_group, region, channel_name, source)
         enriched.append((ch, final_group))
 
     # Ordenar BR Notícias por relevância
