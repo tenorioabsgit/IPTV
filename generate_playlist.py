@@ -6,6 +6,8 @@ URL fixa: https://raw.githubusercontent.com/tenorioabsgit/iptv/main/playlist.m3u
 """
 
 import re
+import json
+import os
 import requests
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -567,6 +569,156 @@ def extract_logo_from_extinf(extinf_line):
     return match.group(1) if match else ''
 
 
+# ============================================================
+# FALLBACK DE LOGOS
+# ============================================================
+
+LOGO_FALLBACKS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logo_fallbacks.json')
+
+
+def normalize_channel_name(name):
+    """Normaliza nome do canal para matching de logos."""
+    if not name:
+        return '', ''
+    n = name.lower().strip()
+    # Remove sufixos de região/variante entre parênteses
+    n = re.sub(r'\s*\([^)]*(?:br|us|ca|au|nz|gb|geo|h265|alt|in|desativado|charlotte county fa|greensboro nc|substitut)[^)]*\).*$', '', n, flags=re.IGNORECASE)
+    n = re.sub(r'\s*\(australia\).*$', '', n, flags=re.IGNORECASE)
+    n = re.sub(r'\s*\(nz\).*$', '', n, flags=re.IGNORECASE)
+    n = re.sub(r'\s*\(nr\).*$', '', n, flags=re.IGNORECASE)
+    # Remove sufixos sem parênteses: "alt", "H265", "Substituto ..."
+    n = re.sub(r'\s+(?:alt|h265)\s*$', '', n, flags=re.IGNORECASE)
+    n = re.sub(r'\s+substituto\s.*$', '', n, flags=re.IGNORECASE)
+    # Remove notas/comentários tipo "note redirect is..." ou "find correct..."
+    n = re.sub(r'\s+(?:note|find|path|via|test|not listed|replacement|cc path)[\s\S]*$', '', n, flags=re.IGNORECASE)
+    # Remove acentos comuns para matching
+    replacements = {'ã': 'a', 'á': 'a', 'à': 'a', 'â': 'a', 'é': 'e', 'ê': 'e',
+                    'í': 'i', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ú': 'u', 'ç': 'c',
+                    'ă': 'a', 'ü': 'u', 'ñ': 'n'}
+    n_no_accent = ''.join(replacements.get(c, c) for c in n)
+    return n.strip(), n_no_accent.strip()
+
+
+def load_logo_fallbacks():
+    """Carrega o mapeamento de fallback de logos do arquivo JSON."""
+    if not os.path.exists(LOGO_FALLBACKS_FILE):
+        return {}
+    try:
+        with open(LOGO_FALLBACKS_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        # Filtrar chaves que começam com _ (comentários)
+        return {k: v for k, v in data.items() if not k.startswith('_')}
+    except Exception as e:
+        print(f"  AVISO: Erro ao carregar logo_fallbacks.json: {e}")
+        return {}
+
+
+def save_logo_fallbacks(fallbacks):
+    """Salva o mapeamento de fallback de logos atualizado."""
+    # Manter o comentário original
+    data = {
+        "_comment": "Fallback logos for channels without tvg-logo. Keys are normalized (lowercase). Auto-updated by generate_playlist.py",
+    }
+    # Ordenar por chave
+    for k in sorted(fallbacks.keys()):
+        if not k.startswith('_'):
+            data[k] = fallbacks[k]
+    try:
+        with open(LOGO_FALLBACKS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"  AVISO: Erro ao salvar logo_fallbacks.json: {e}")
+
+
+def update_extinf_logo(extinf_line, logo_url):
+    """Adiciona ou atualiza o tvg-logo em uma linha EXTINF."""
+    if 'tvg-logo="' in extinf_line:
+        return re.sub(r'tvg-logo="[^"]*"', f'tvg-logo="{logo_url}"', extinf_line)
+    # Sem tvg-logo: adicionar antes da vírgula
+    if '#EXTINF:-1,' in extinf_line and '#EXTINF:-1 ' not in extinf_line:
+        return extinf_line.replace('#EXTINF:-1,', f'#EXTINF:-1 tvg-logo="{logo_url}",', 1)
+    else:
+        return extinf_line.replace('#EXTINF:-1 ', f'#EXTINF:-1 tvg-logo="{logo_url}" ', 1)
+
+
+def apply_logo_fallbacks(channels):
+    """Aplica logos de fallback para canais sem logo.
+
+    Estratégia em 2 camadas:
+    1. Mapa runtime: logos de canais que JÁ têm logo na coleta atual (match por nome normalizado)
+    2. Fallback hardcoded: logo_fallbacks.json com URLs curadas manualmente
+    """
+    fallbacks = load_logo_fallbacks()
+
+    # Camada 1: construir mapa runtime de nome -> logo a partir dos canais que já têm
+    runtime_logos = {}
+    for ch in channels:
+        logo = ch.get('logo', '').strip()
+        if logo:
+            name = ch.get('name', '')
+            norm, norm_no_accent = normalize_channel_name(name)
+            if norm and norm not in runtime_logos:
+                runtime_logos[norm] = logo
+            if norm_no_accent and norm_no_accent not in runtime_logos:
+                runtime_logos[norm_no_accent] = logo
+
+    # Camada 2: aplicar fallbacks
+    applied_runtime = 0
+    applied_fallback = 0
+    new_fallbacks = {}
+
+    for ch in channels:
+        logo = ch.get('logo', '').strip()
+        if logo:
+            # Canal já tem logo - registrar no fallback para uso futuro
+            norm, norm_no_accent = normalize_channel_name(ch.get('name', ''))
+            if norm and norm not in fallbacks:
+                new_fallbacks[norm] = logo
+            continue
+
+        name = ch.get('name', '')
+        norm, norm_no_accent = normalize_channel_name(name)
+        found_logo = None
+
+        # Tentar match no mapa runtime (canais com logo da mesma coleta)
+        if norm in runtime_logos:
+            found_logo = runtime_logos[norm]
+            applied_runtime += 1
+        elif norm_no_accent in runtime_logos:
+            found_logo = runtime_logos[norm_no_accent]
+            applied_runtime += 1
+        # Tentar match no fallback hardcoded
+        elif norm in fallbacks:
+            found_logo = fallbacks[norm]
+            applied_fallback += 1
+        elif norm_no_accent in fallbacks:
+            found_logo = fallbacks[norm_no_accent]
+            applied_fallback += 1
+        # Tentar match parcial: nome exato (lowercase) no fallback
+        else:
+            name_lower = name.lower().strip()
+            if name_lower in fallbacks:
+                found_logo = fallbacks[name_lower]
+                applied_fallback += 1
+
+        if found_logo:
+            ch['logo'] = found_logo
+            ch['extinf'] = update_extinf_logo(ch['extinf'], found_logo)
+
+    # Atualizar fallback com novos logos descobertos
+    if new_fallbacks:
+        fallbacks.update(new_fallbacks)
+        save_logo_fallbacks(fallbacks)
+        print(f"  Fallback atualizado com {len(new_fallbacks)} novos logos")
+
+    still_missing = sum(1 for ch in channels if not ch.get('logo', '').strip())
+    print(f"  Logos aplicados via runtime match: {applied_runtime}")
+    print(f"  Logos aplicados via fallback hardcoded: {applied_fallback}")
+    print(f"  Canais ainda sem logo: {still_missing}")
+
+    return channels
+
+
 def update_extinf_group(extinf_line, new_group):
     """Atualiza o group-title em uma linha EXTINF."""
     if 'group-title="' in extinf_line:
@@ -746,6 +898,11 @@ def collect_all_channels():
     without_logo = len(all_channels) - with_logo
     print(f"  Canais com logo: {with_logo}")
     print(f"  Canais sem logo: {without_logo}")
+
+    # Aplicar fallback de logos para canais sem logo
+    if without_logo > 0:
+        print(f"\nAplicando fallback de logos...")
+        all_channels = apply_logo_fallbacks(all_channels)
 
     return all_channels
 
